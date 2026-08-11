@@ -105,7 +105,7 @@
 
 	.fahar-mobile-nav__list > li > a:focus-visible {
 		outline: var(--fahar-focus-ring-width) solid var(--fahar-color-focus);
-		outline-offset: calc(-1 * var(--fahar-focus-ring-width));
+		outline-offset: var(--fahar-focus-ring-offset);
 		box-shadow: var(--fahar-focus-ring);
 	}
 
