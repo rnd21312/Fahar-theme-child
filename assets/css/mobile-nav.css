@@ -79,7 +79,7 @@
 	}
 
 	@media (hover: hover) and (pointer: fine) {
-		.fahar-mobile-nav__list > li > a:hover {
+		.fahar-mobile-nav__list > li:not(.current-menu-item, .current_page_item, .current-menu-ancestor) > a:not([aria-current="page"]):hover {
 			border-color: var(--fahar-color-border-subtle);
 			background-color: var(--fahar-color-control-hover);
 			color: var(--fahar-color-control-hover-text);
@@ -96,10 +96,11 @@
 		font-weight: var(--fahar-weight-semibold);
 	}
 
-	.fahar-mobile-nav__list > li > a:active {
+	.fahar-mobile-nav__list > li:not(.current-menu-item, .current_page_item, .current-menu-ancestor) > a:not([aria-current="page"]):active {
+		border-color: var(--fahar-color-border-subtle);
 		background-color: var(--fahar-color-control-active);
 		color: var(--fahar-color-control-active-text);
-		transform: scale(0.97);
+		transform: scale(0.98);
 	}
 
 	.fahar-mobile-nav__list > li > a:focus-visible {
@@ -156,7 +157,7 @@
 			transition: none;
 		}
 
-		.fahar-mobile-nav__list > li > a:active {
+		.fahar-mobile-nav__list > li:not(.current-menu-item, .current_page_item, .current-menu-ancestor) > a:not([aria-current="page"]):active {
 			transform: none;
 		}
 	}
