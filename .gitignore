@@ -1,4 +1,4 @@
-# Operating system and editor files.
+# OS/editor
 .DS_Store
 Thumbs.db
 *.swp
@@ -6,12 +6,30 @@ Thumbs.db
 .idea/
 .vscode/
 
-# Local WordPress and environment configuration.
+# Environment
 .env
 .env.*
 !.env.example
 wp-config.php
 
-# Generated archives and logs.
-*.log
+# Build artifacts
+build/
 *.zip
+*.log
+
+# Package dependencies
+node_modules/
+vendor/
+
+# Test/cache/runtime
+coverage/
+.phpunit.result.cache
+.cache/
+.tmp/
+
+# Local tooling
+.codex/
+
+# Temporary files
+*.tmp
+*.bak
