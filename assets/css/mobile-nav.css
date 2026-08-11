@@ -90,9 +90,9 @@
 	.fahar-mobile-nav__list > .current-menu-item > a,
 	.fahar-mobile-nav__list > .current_page_item > a,
 	.fahar-mobile-nav__list > .current-menu-ancestor > a {
-		border-color: var(--fahar-color-control-selected);
-		background-color: var(--fahar-color-control-selected);
-		color: var(--fahar-color-control-selected-text);
+		border-color: var(--fahar-color-border-strong);
+		background-color: var(--fahar-color-surface-active);
+		color: var(--fahar-color-accent);
 		font-weight: var(--fahar-weight-semibold);
 	}
 
