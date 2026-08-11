@@ -1,175 +1,106 @@
 # AGENTS.md — Fahar Theme Child
 
-## Mission
-Build Fahar as a fast, Persian/RTL-first, app-like WordPress portfolio.
+## Goal
+Fast Persian/RTL-first app-like WordPress portfolio.
 
 - Parent: `hello-elementor`
-- Primary visual/brand source: live `https://fahar.ir/`
-- Behavioral reference: Pinterest only for discovery/app interaction patterns not defined by the live Fahar site
-- Brand: preserve the visual identity of `fahar.ir`; current theme tokens remain authoritative until a live visual check justifies a change
-- Existing WordPress/Elementor content is authoritative; never rebuild or migrate it unless explicitly asked.
-- This child theme is the presentation layer, not a general application plugin.
+- Visual/brand source: live `https://fahar.ir/`
+- Pinterest: secondary interaction reference only (masonry/discovery/feed-detail)
+- Preserve existing WordPress/Elementor content, URLs, media, taxonomies, comments and SEO/meta.
+- Never edit WordPress/Hello Elementor/Elementor/vendor core.
 
-## How to work
-Treat this file as a map, not an encyclopedia.
+## Codex mode: ultra-lean
+Act as a coding agent, not a consultant.
 
-For every task:
-1. Read the active user request.
-2. `git status`.
-3. Inspect only the relevant files.
-4. Make the smallest complete change.
-5. Run the smallest relevant validation.
-6. Review `git diff` and `git diff --check`.
+- Do not narrate plans or reasoning.
+- Do not explain architecture unless asked.
+- Do not re-audit known project areas.
+- Do not browse/research unless the task requires current/external evidence.
+- Do not inspect the whole repo/tree.
+- Search first; open only files needed to patch.
+- Do not read docs unless directly relevant.
+- Do not implement adjacent/future improvements.
+- Do not refactor unrelated code.
+- Do not create speculative abstractions.
+- Prefer existing helpers/tokens/components.
+- Patch → validate → stop.
+- Ask only when blocked by a decision that cannot safely be inferred.
 
-Avoid whole-repo re-audits, large tree dumps, vendor/generated files, speculative abstractions, unrelated refactors, and future-task work.
+Default task flow:
+`git status` → inspect 2–5 relevant files → edit → smallest validation → `git diff --check` → stop.
 
-Deeper docs:
-- `docs/DEVELOPMENT.md` — workflow/release checks
-- `docs/PERFORMANCE-ACCESSIBILITY-QA.md` — completed static QA + runtime limits
-- `docs/ROADMAP.md` — broad roadmap
-
-When docs and code disagree, verify behavior in code and update stale docs only when in scope.
-
-## Product invariants
-Target: portfolio web application, not a blog-style theme.
-
-Core UX: `/portfolios/` full-width masonry discovery, search/filters, progressive loading, media-first Single Portfolio, related items, Back-to-Explore restoration, desktop header, mobile bottom nav.
-
-Never add a permanent desktop sidebar.
-
-Preserve Elementor pages/templates/editor workflow, portfolio posts/media/taxonomies, comments, SEO/meta, and URLs where practical. Never modify WordPress core, Hello Elementor, Elementor core, or vendor/plugin code.
+Final output max 6 short lines: changed files + validation + blocker only if any. No recap, essay, praise, or unsolicited next steps.
 
 ## Architecture
-Keep `functions.php` small; place focused logic in existing `inc/` modules.
+Keep `functions.php` small. Use existing `inc/` modules. Provider-specific portfolio logic stays behind `inc/portfolio.php`.
 
-Theme owns presentation, templates, CSS/tokens, frontend progressive enhancement, navigation presentation, Elementor compatibility, RTL/accessibility presentation, and conditional assets.
+Theme owns presentation/templates/frontend enhancement. Reusable functionality that must survive theme changes belongs in future `fahar-elementor-core`.
 
-Functionality that should survive a theme switch belongs in a future companion plugin such as `fahar-elementor-core` (e.g. reusable Elementor widgets, persistent likes, general application APIs).
+## UI tasks
+For visible UI/layout/interaction/responsive/motion/navigation work:
 
-Use existing helpers before creating abstractions. Keep provider-specific portfolio logic behind `inc/portfolio.php`.
+1. load **UI UX Pro Max**;
+2. load repo skill `.agents/skills/fahar-ui-system/SKILL.md`;
+3. use only the relevant UI-system reference file;
+4. stop if a required UI skill is unavailable.
 
-## UI/UX — mandatory
-Any task changing visible UI, layout, interaction, responsive behavior, motion, navigation, or reusable UI components must:
+Visual priority: `fahar.ir` → implemented Fahar design system → Pinterest behavior only where Fahar has no equivalent pattern.
 
-- load and apply the installed **UI UX Pro Max** skill before UI/UX decisions;
-- load and apply the repo-local **`fahar-ui-system`** skill from `.agents/skills/fahar-ui-system/`;
-- stop and report if either required UI skill is unavailable;
-- use live `fahar.ir` as the primary source for Fahar visual identity: palette, typography feel, geometry, density, surfaces, controls, and brand character;
-- use Pinterest only as a secondary behavioral reference for portfolio discovery, masonry, feed/detail flow, and related app patterns where `fahar.ir` has no equivalent interaction;
-- never copy Pinterest branding, red, proprietary assets, screenshots, or source code;
-- prefer media-first, compact app-like UI over traditional WordPress chrome;
-- avoid excessive glow, gradients, glass, shadows, and decorative DOM.
-
-If live `fahar.ir` cannot be visually checked during a task, do not invent exact brand values. Preserve the existing verified Fahar tokens/components and state the verification limitation.
-
-Validate relevant mobile, desktop, RTL, keyboard/focus, touch, and reduced-motion states.
+If `fahar.ir` cannot be visually inspected, keep existing verified tokens/components; never guess brand values.
 
 ## Design system
-Canonical sources:
+Canonical:
+- `assets/css/tokens.css` — global semantic values
+- `assets/css/components.css` — primitives
+- dedicated component CSS — complex reusable components
+- `.agents/skills/fahar-ui-system/references/` — contracts
 
-- `assets/css/tokens.css` — semantic/global values
-- `assets/css/components.css` — reusable primitive controls/surfaces
-- component-specific CSS such as `portfolio-card.css` and `mobile-nav.css` — reusable complex components
-- `.agents/skills/fahar-ui-system/references/` — component/pattern contracts for Codex
+Use `--fahar-*` tokens and `fahar-` classes. Page CSS owns composition/layout, not duplicate primitive styles. Reuse/extend before creating a component. Repeated visual behavior becomes a canonical component/token, not copied CSS.
 
-Use existing `--fahar-*` tokens for repeated colors/states, spacing, radius, shadows, typography, containers, motion, focus, and navigation dimensions. Class prefix: `fahar-`.
+Use logical CSS, native modern CSS, RTL-safe behavior, `:focus-visible`, reduced motion and ~44px practical touch targets. No framework/icon-font/heavy visual dependency unless explicitly required.
 
-Page/screen CSS may compose components and own layout, but must not silently redefine canonical buttons, fields, surfaces, chips, badges, cards, or navigation primitives. If a visual pattern will be reused, promote it to the design system instead of copying styles between screens.
-
-Prefer logical CSS properties and native modern CSS. Avoid CSS frameworks, utility explosions, brittle Elementor selectors, raw repeated design values, and unnecessary `!important`.
-
-## Portfolio media contract
-`fahar_theme_get_portfolio_media_items()` defines Single Portfolio media order:
-
+## Portfolio contract
+Single media order from `fahar_theme_get_portfolio_media_items()`:
 1. Featured Image
-2. content-authored media
+2. content media
 3. verified provider cover/lightbox/video
-4. remaining WordPress attachments
+4. remaining attachments
 
-Featured Image is primary/first when present. Supported media renders in `.fahar-portfolio-single__media`, not duplicated in description. Never mutate stored `post_content` to remove media. Do not weaken existing media URL/provider validation.
+Featured Image stays first when present. Supported media renders in `.fahar-portfolio-single__media`, never duplicated in description. Never mutate stored content or weaken provider/URL validation.
 
-## Frontend code
-JavaScript default: vanilla only. Do not add React/Vue/Svelte/Alpine/jQuery, slider libraries, masonry libraries, or similar dependencies without proven need.
+## Code rules
+**JS:** vanilla, progressive enhancement, guarded DOM, conditional loading, minimal listeners/layout work. Prefer native scroll/snap, IntersectionObserver, ResizeObserver, requestAnimationFrame.
 
-JS must use progressive enhancement, safe DOM guards, multiple-instance safety where relevant, reduced-motion support, minimal listeners/layout work, and conditional loading. Prefer native scroll/CSS scroll snap, IntersectionObserver, ResizeObserver, and requestAnimationFrame. Avoid globals; use `FaharTheme` only if unavoidable.
+**PHP:** WordPress APIs; `fahar_theme_*`; sanitize input; escape output; nonce/capability checks for mutations; no direct SQL/custom tables/new REST/AJAX unless task requires it; Elementor optional/defensive; never require Pro.
 
-CSS: use Grid/Flexbox, logical properties, `clamp()`, `aspect-ratio`, `:focus-visible`, and `prefers-reduced-motion`.
+**Performance:** mobile-first; conditional assets; responsive/intrinsic images; primary Single image may be eager/high priority; other media lazy; native video `preload="metadata"`; no autoplay feed media or eager remote embeds.
 
-## PHP / WordPress / Elementor
-Follow WordPress APIs/conventions and current project patterns.
+**A11y/security:** semantic controls, keyboard/focus, accessible names, useful ARIA, contrast/touch/reduced-motion; sanitize/escape/validate/KSES; arbitrary stored embed HTML is forbidden.
 
-- Functions/hooks: `fahar_theme_*`
-- Constants: `FAHAR_THEME_*`
-- sanitize inputs; escape outputs
-- use nonces + capability checks for mutations
-- validate URLs/attachment IDs
-- prefer WordPress APIs over direct SQL
-- no custom tables or new REST/AJAX surfaces without explicit scope
-- detect optional plugins defensively
-- never assume Elementor Pro
-- never break Elementor Editor
+## File map
+UI system: skill + one relevant reference + tokens/component CSS only as needed.
 
-## Performance
-Mobile performance is a product requirement.
+Mobile nav: `template-parts/navigation/mobile-bottom-nav.php`, `assets/css/mobile-nav.css`, `inc/navigation.php`.
 
-Prefer conditional assets, WordPress responsive images, intrinsic dimensions, eager/high-priority primary Single image when appropriate, lazy non-primary images/iframes, native video with `preload="metadata"`, minimal JS/DOM, and local cacheable assets.
+Explore: relevant template/parts + `portfolio-explore.css`, `portfolio-card.css`, `portfolio-explore.js`; `inc/portfolio.php` only for data behavior.
 
-Do not globally enqueue feature assets, add icon fonts/heavy UI libraries, autoplay feed video, eagerly embed remote players in cards, or blindly dequeue WordPress/Elementor assets.
-
-Never claim Lighthouse/runtime results unless actually measured.
-
-## Accessibility + security
-User-facing changes require semantic HTML, real links/buttons, visible focus, accessible names, keyboard-safe interactions, useful alt behavior, appropriate ARIA, adequate contrast/touch targets, and reduced-motion support. No clickable `<div>` or hover-only functionality.
-
-Treat content/meta as untrusted: sanitize, escape, validate, restrict iframe providers, use KSES where appropriate, and never render arbitrary stored embed HTML.
-
-## Relevant-file map
-Open the smallest useful set.
-
-**Design-system/UI task:** `.agents/skills/fahar-ui-system/SKILL.md`, only the relevant reference file, `assets/css/tokens.css`, and the relevant component/page CSS.
-
-**Mobile nav:** `template-parts/navigation/mobile-bottom-nav.php`, `assets/css/mobile-nav.css`, `inc/navigation.php`, tokens only if needed.
-
-**Explore:** relevant Explore template/parts, `assets/css/portfolio-explore.css`, `assets/css/portfolio-card.css`, `assets/js/portfolio-explore.js`; open `inc/portfolio.php` only for data behavior.
-
-**Single:** relevant `template-parts/portfolio/*`, `assets/css/portfolio-single.css`, `assets/js/portfolio-single.js`; open `inc/portfolio.php` only for media/data behavior.
-
-Search before opening large files.
+Single: relevant `template-parts/portfolio/*` + `portfolio-single.css`, `portfolio-single.js`; `inc/portfolio.php` only for data/media behavior.
 
 ## Current state
-Foundation through static performance/accessibility QA is implemented. Do not restart scaffold Tasks 1–25.
+Foundation through static performance/accessibility QA is done. Do not restart Tasks 1–25.
 
-Known UX debt: Explore desktop CSS still contains a permanent filter/sidebar treatment; this conflicts with the full-width/no-sidebar target.
-
-Default visual order unless the user changes priority:
-1. mobile bottom-nav polish
-2. Explore full-width app shell / remove desktop sidebar
-3. search/filter polish
-4. portfolio-card polish
-5. Single media controls polish
-6. Single action hierarchy
-7. real-browser mobile Lighthouse/accessibility QA
-
-The active user task always wins.
+Known UX debt: permanent desktop Explore sidebar conflicts with full-width/no-sidebar target.
 
 ## Validation
-No frontend build pipeline is required. Run only relevant checks:
+Run only what changed:
+- PHP: `php -l file.php`
+- JS: `node --check file.js`
+- UI CSS: `python tools/check-ui-system.py changed.css`
+- always: `git diff --check`
 
-- PHP: `php -l path/to/changed.php`
-- JS: `node --check path/to/changed.js`
-- Design-system CSS: `python tools/check-ui-system.py path/to/changed.css ...`
-- General: `git diff --check`
+Never claim browser/Lighthouse/runtime tests unless actually run.
 
-For UI tasks, validate applicable mobile/desktop/RTL/focus/touch/reduced-motion/Elementor/no-JS states. Never claim browser or WordPress runtime testing unless it actually ran.
+## Git
+Do not overwrite unrelated changes. Do not commit/push/merge/amend unless explicitly requested. One task = one focused diff.
 
-## Git + reporting
-Do not overwrite unrelated user changes. Do not commit/push/merge/amend/rewrite history unless explicitly requested. Keep a task small enough for one focused commit.
-
-Prefer commit forms such as `ui(explore): remove desktop sidebar`, `ui(single): refine media controls`, `perf(explore): reduce layout work`, `fix(portfolio): preserve media ordering`.
-
-Final response: only concise **Summary**, **Files changed**, **Validation**, and one **Next** recommendation. Do not restate project context or paste unchanged code.
-
-## Priority
-If requirements conflict: explicit user request → Fahar live brand identity → data/content preservation → security/correctness → accessibility → mobile performance → existing architecture → interaction reference parity → visual polish.
-
-Make the smallest high-quality change that moves Fahar toward a fast, accessible, Persian-first portfolio application.
+Priority: user request → Fahar brand → data/security/correctness → accessibility → mobile performance → architecture → interaction polish.
