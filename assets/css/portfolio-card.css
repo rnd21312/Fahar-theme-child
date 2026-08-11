@@ -1,0 +1,131 @@
+/** Reusable portfolio card; parent layouts own grid behavior. */
+.fahar-portfolio-card {
+	min-inline-size: 0;
+	border: 0;
+	background-color: transparent;
+	box-shadow: none;
+}
+
+.fahar-portfolio-card__link {
+	display: grid;
+	gap: var(--fahar-space-2);
+	border-radius: var(--fahar-radius-lg);
+	color: var(--fahar-color-text-primary);
+	text-align: start;
+	text-decoration: none;
+	touch-action: manipulation;
+}
+
+.fahar-portfolio-card__link:hover {
+	color: var(--fahar-color-text-primary);
+}
+
+.fahar-portfolio-card__link:focus-visible {
+	outline: var(--fahar-focus-ring-width) solid var(--fahar-color-focus-ring);
+	outline-offset: var(--fahar-focus-ring-offset);
+	box-shadow: var(--fahar-focus-ring);
+}
+
+.fahar-portfolio-card__media {
+	position: relative;
+	border-radius: var(--fahar-radius-lg);
+	background-color: var(--fahar-color-surface-2);
+	overflow: hidden;
+}
+
+.fahar-portfolio-card__media::after {
+	position: absolute;
+	content: "";
+	inset: 0;
+	background-color: var(--fahar-color-background);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity var(--fahar-motion-normal) var(--fahar-ease-standard);
+}
+
+.fahar-portfolio-card__image {
+	display: block;
+	inline-size: 100%;
+	block-size: auto;
+	transition: transform var(--fahar-motion-normal) var(--fahar-ease-standard);
+}
+
+.fahar-portfolio-card__placeholder {
+	display: grid;
+	place-items: center;
+	min-block-size: 8rem;
+	aspect-ratio: 4 / 3;
+	padding: var(--fahar-space-4);
+	color: var(--fahar-color-text-muted);
+	font-size: var(--fahar-text-body-sm);
+	font-weight: var(--fahar-weight-medium);
+}
+
+.fahar-portfolio-card__play {
+	position: absolute;
+	z-index: 1;
+	inset-block-end: var(--fahar-space-2);
+	inset-inline-end: var(--fahar-space-2);
+	display: grid;
+	place-items: center;
+	inline-size: 2rem;
+	block-size: 2rem;
+	border: 1px solid var(--fahar-color-border-strong);
+	border-radius: var(--fahar-radius-round);
+	background-color: var(--fahar-color-background-elevated);
+	color: var(--fahar-color-desert-gold);
+	box-shadow: var(--fahar-shadow-subtle);
+}
+
+.fahar-portfolio-card__play svg {
+	inline-size: 1rem;
+	block-size: 1rem;
+}
+
+.fahar-portfolio-card__content {
+	display: grid;
+	gap: 0;
+	padding-inline: var(--fahar-space-1);
+}
+
+.fahar-portfolio-card__title {
+	margin: 0;
+	color: var(--fahar-color-text-primary);
+	font-size: var(--fahar-text-body-sm);
+	font-weight: var(--fahar-weight-semibold);
+	line-height: var(--fahar-line-height-body);
+	overflow-wrap: anywhere;
+	transition: color var(--fahar-motion-fast) var(--fahar-ease-standard);
+}
+
+.fahar-portfolio-card__meta {
+	color: var(--fahar-color-text-muted);
+	font-size: var(--fahar-text-meta);
+	line-height: var(--fahar-line-height-heading);
+	overflow-wrap: anywhere;
+}
+
+@media (hover: hover) and (pointer: fine) {
+	a.fahar-portfolio-card__link:hover .fahar-portfolio-card__media::after,
+	a.fahar-portfolio-card__link:focus-visible .fahar-portfolio-card__media::after {
+		opacity: 0.16;
+	}
+
+	a.fahar-portfolio-card__link:hover .fahar-portfolio-card__image,
+	a.fahar-portfolio-card__link:focus-visible .fahar-portfolio-card__image {
+		transform: scale(1.02);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.fahar-portfolio-card__media::after,
+	.fahar-portfolio-card__image,
+	.fahar-portfolio-card__title {
+		transition: none;
+	}
+
+	a.fahar-portfolio-card__link:hover .fahar-portfolio-card__image,
+	a.fahar-portfolio-card__link:focus-visible .fahar-portfolio-card__image {
+		transform: none;
+	}
+}

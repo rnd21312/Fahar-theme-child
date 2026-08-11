@@ -1,0 +1,116 @@
+/** Sticky desktop header fallback. Elementor headers are not targeted here. */
+.fahar-site-header {
+	position: sticky;
+	inset-block-start: 0;
+	z-index: var(--fahar-z-header);
+	min-block-size: var(--fahar-header-height);
+	border-block-end: 1px solid var(--fahar-color-border-subtle);
+	background-color: var(--fahar-color-surface-1);
+	box-shadow: var(--fahar-shadow-subtle);
+}
+
+.fahar-site-header__inner {
+	display: flex;
+	align-items: center;
+	gap: var(--fahar-space-4);
+	min-block-size: var(--fahar-header-height);
+	padding-inline: var(--fahar-page-padding-inline-mobile);
+}
+
+.fahar-site-brand {
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+}
+
+.fahar-site-brand__name,
+.fahar-site-brand .custom-logo-link {
+	display: inline-flex;
+	align-items: center;
+	min-block-size: 2.75rem;
+	color: var(--fahar-color-text-primary);
+	font-size: var(--fahar-text-body-lg);
+	font-weight: var(--fahar-weight-bold);
+	line-height: var(--fahar-line-height-tight);
+	text-decoration: none;
+	transition: color var(--fahar-motion-fast) var(--fahar-ease-standard);
+}
+
+.fahar-site-brand__name:hover,
+.fahar-site-brand .custom-logo-link:hover {
+	color: var(--fahar-color-button-hover);
+}
+
+.fahar-site-brand .custom-logo {
+	inline-size: auto;
+	max-block-size: calc(var(--fahar-header-height) - (2 * var(--fahar-space-2)));
+}
+
+.fahar-primary-nav {
+	margin-inline-start: auto;
+}
+
+.fahar-primary-nav__menu {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--fahar-space-1);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.fahar-primary-nav__menu > li {
+	margin: 0;
+}
+
+.fahar-primary-nav__menu > li > a {
+	display: inline-flex;
+	align-items: center;
+	min-block-size: 2.75rem;
+	padding-inline: var(--fahar-space-3);
+	border-block-end: 2px solid transparent;
+	color: var(--fahar-color-control-text);
+	font-size: var(--fahar-text-body-sm);
+	font-weight: var(--fahar-weight-medium);
+	line-height: var(--fahar-line-height-tight);
+	text-decoration: none;
+	transition:
+		border-color var(--fahar-motion-fast) var(--fahar-ease-standard),
+		color var(--fahar-motion-fast) var(--fahar-ease-standard);
+}
+
+.fahar-primary-nav__menu > li > a:hover {
+	color: var(--fahar-color-button-hover);
+}
+
+.fahar-primary-nav__menu > li > a:active {
+	color: var(--fahar-color-button-active);
+}
+
+.fahar-primary-nav__menu > .current-menu-item > a,
+.fahar-primary-nav__menu > .current_page_item > a,
+.fahar-primary-nav__menu > .current-menu-ancestor > a {
+	border-block-end-color: var(--fahar-color-button-selected);
+	color: var(--fahar-color-button-selected);
+}
+
+.fahar-site-header__actions {
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	gap: var(--fahar-space-2);
+}
+
+@media (min-width: 48rem) {
+	.fahar-site-header__inner {
+		padding-inline: var(--fahar-page-padding-inline);
+	}
+}
+
+@media (max-width: 47.999rem) {
+	.fahar-primary-nav,
+	.fahar-site-header__actions {
+		display: none;
+	}
+}

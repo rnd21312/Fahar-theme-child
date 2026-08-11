@@ -1,0 +1,166 @@
+/** Floating, mobile-only bottom navigation. */
+.fahar-mobile-nav {
+	display: none;
+}
+
+@media (max-width: 47.999rem) {
+	body.fahar-has-mobile-nav {
+		padding-block-end: calc(var(--fahar-mobile-nav-height) + var(--fahar-space-5) + env(safe-area-inset-bottom));
+	}
+
+	.fahar-mobile-nav {
+		position: fixed;
+		inset-inline: 0;
+		inset-block-end: calc(var(--fahar-space-3) + env(safe-area-inset-bottom));
+		display: block;
+		z-index: var(--fahar-z-mobile-nav);
+		inline-size: min(
+			calc(
+				100% - max(var(--fahar-space-3), env(safe-area-inset-left)) - max(var(--fahar-space-3), env(safe-area-inset-right))
+			),
+			30rem
+		);
+		margin-inline: auto;
+		border: 1px solid var(--fahar-color-border-subtle);
+		border-radius: 200px;
+		background-color: var(--fahar-color-surface-1);
+		box-shadow: var(--fahar-shadow-medium);
+		isolation: isolate;
+	}
+
+	.fahar-mobile-nav__inner {
+		min-block-size: var(--fahar-mobile-nav-height);
+		padding: var(--fahar-space-1);
+	}
+
+	.fahar-mobile-nav__list {
+		display: flex;
+		align-items: stretch;
+		gap: var(--fahar-space-2);
+		min-block-size: calc(var(--fahar-mobile-nav-height) - (2 * var(--fahar-space-1)));
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.fahar-mobile-nav__list > li {
+		display: flex;
+		flex: 1 1 0;
+		min-inline-size: 0;
+		margin: 0;
+	}
+
+	.fahar-mobile-nav__list > li > a {
+		display: flex;
+		flex: 1 1 auto;
+		align-items: center;
+		justify-content: center;
+		min-block-size: 3.5rem;
+		padding-block: var(--fahar-space-1);
+		padding-inline: var(--fahar-space-2);
+		border: 1px solid transparent;
+		border-radius: var(--fahar-radius-pill);
+		background-color: transparent;
+		color: var(--fahar-color-control-text);
+		font-size: var(--fahar-text-meta);
+		font-weight: var(--fahar-weight-medium);
+		line-height: var(--fahar-line-height-tight);
+		text-align: center;
+		text-decoration: none;
+		touch-action: manipulation;
+		-webkit-tap-highlight-color: transparent;
+		transition:
+			background-color var(--fahar-motion-fast) var(--fahar-ease-standard),
+			border-color var(--fahar-motion-fast) var(--fahar-ease-standard),
+			color var(--fahar-motion-fast) var(--fahar-ease-standard),
+			opacity var(--fahar-motion-fast) var(--fahar-ease-standard),
+			transform var(--fahar-motion-fast) var(--fahar-ease-standard);
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		.fahar-mobile-nav__list > li > a:hover {
+			border-color: var(--fahar-color-border-subtle);
+			background-color: var(--fahar-color-control-hover);
+			color: var(--fahar-color-control-hover-text);
+		}
+	}
+
+	.fahar-mobile-nav__list > li > a[aria-current="page"],
+	.fahar-mobile-nav__list > .current-menu-item > a,
+	.fahar-mobile-nav__list > .current_page_item > a,
+	.fahar-mobile-nav__list > .current-menu-ancestor > a {
+		border-color: var(--fahar-color-control-selected);
+		background-color: var(--fahar-color-control-selected);
+		color: var(--fahar-color-control-selected-text);
+		font-weight: var(--fahar-weight-semibold);
+	}
+
+	.fahar-mobile-nav__list > li > a:active {
+		background-color: var(--fahar-color-control-active);
+		color: var(--fahar-color-control-active-text);
+		transform: scale(0.97);
+	}
+
+	.fahar-mobile-nav__list > li > a:focus-visible {
+		outline: var(--fahar-focus-ring-width) solid var(--fahar-color-focus);
+		outline-offset: calc(-1 * var(--fahar-focus-ring-width));
+		box-shadow: var(--fahar-focus-ring);
+	}
+
+	.fahar-mobile-nav__icon {
+		display: inline-flex;
+		inline-size: 1.5rem;
+		block-size: 1.5rem;
+		transition: transform var(--fahar-motion-fast) var(--fahar-ease-standard);
+	}
+
+	.fahar-mobile-nav__icon svg {
+		inline-size: 100%;
+		block-size: 100%;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 1.75;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+	}
+
+	.fahar-mobile-nav__label {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		margin: -1px;
+		padding: 0;
+		border: 0;
+		clip: rect(0 0 0 0);
+		clip-path: inset(50%);
+		overflow: hidden;
+		white-space: nowrap;
+	}
+
+	@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+		.fahar-mobile-nav {
+			background-color: color-mix(in srgb, var(--fahar-color-surface-1) 88%, transparent);
+			-webkit-backdrop-filter: blur(14px) saturate(1.12);
+			backdrop-filter: blur(14px) saturate(1.12);
+		}
+	}
+
+	body.elementor-editor-active.fahar-has-mobile-nav {
+		padding-block-end: 0;
+	}
+
+	body.elementor-editor-active .fahar-mobile-nav {
+		display: none;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.fahar-mobile-nav__list > li > a,
+		.fahar-mobile-nav__icon {
+			transition: none;
+		}
+
+		.fahar-mobile-nav__list > li > a:active {
+			transform: none;
+		}
+	}
+}

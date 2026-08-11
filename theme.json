@@ -1,0 +1,46 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 2,
+	"settings": {
+		"appearanceTools": false,
+		"layout": {
+			"contentSize": "768px",
+			"wideSize": "1200px"
+		},
+		"color": {
+			"custom": true,
+			"customGradient": true,
+			"defaultPalette": true,
+			"palette": [
+				{
+					"slug": "fahar-background",
+					"name": "Fahar Background",
+					"color": "var(--fahar-color-bg)"
+				},
+				{
+					"slug": "fahar-surface",
+					"name": "Fahar Surface",
+					"color": "var(--fahar-color-surface)"
+				},
+				{
+					"slug": "fahar-text",
+					"name": "Fahar Text",
+					"color": "var(--fahar-color-text)"
+				},
+				{
+					"slug": "fahar-accent",
+					"name": "Fahar Accent",
+					"color": "var(--fahar-color-accent)"
+				}
+			]
+		},
+		"spacing": {
+			"units": ["px", "em", "rem", "%", "vw", "vh"]
+		},
+		"typography": {
+			"fluid": true,
+			"customFontSize": true,
+			"dropCap": false
+		}
+	}
+}

@@ -1,15 +1,16 @@
-/* 
-Theme Name: Hello Elementor Child
-Theme URI: https://github.com/elementor/hello-theme-child/
-Description: Hello Elementor Child is a child theme of Hello Elementor, created by Elementor team
-Author: Elementor Team
-Author URI: https://elementor.com/
+/*
+Theme Name: Fahar Theme Child
+Theme URI: https://github.com/rnd21312/Fahar-theme-child
+Description: Production-oriented child theme foundation for the Fahar portfolio experience.
+Author: Fahar
 Template: hello-elementor
-Version: 2.0.0
-Text Domain: hello-elementor-child
-License: GNU General Public License v3 or later.
+Version: 1.0.0
+Requires at least: 5.9
+Requires PHP: 7.4
+Text Domain: fahar-theme-child
+License: GNU General Public License v3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
-Tags: flexible-header, custom-colors, custom-menu, custom-logo, editor-style, featured-images, rtl-language-support, threaded-comments, translation-ready
+Tags: portfolio, rtl-language-support, translation-ready, featured-images
 */
 
-/* Add your custom styles here */
+/* Frontend rules live in assets/css and are enqueued in a deterministic order. */

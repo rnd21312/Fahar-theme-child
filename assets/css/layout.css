@@ -1,0 +1,49 @@
+/** Mobile-first, direction-neutral Fahar layout primitives. */
+.fahar-page {
+	min-block-size: 100%;
+	padding-block: var(--fahar-space-6);
+	padding-inline: var(--fahar-page-padding-inline-mobile);
+}
+
+.fahar-container {
+	inline-size: 100%;
+	max-inline-size: var(--fahar-container-content);
+	margin-inline: auto;
+}
+
+.fahar-container--wide {
+	max-inline-size: var(--fahar-container-wide);
+}
+
+.fahar-container--narrow {
+	max-inline-size: var(--fahar-content-narrow);
+}
+
+.fahar-main {
+	min-block-size: 50vh;
+	padding-block: var(--fahar-space-7);
+}
+
+.fahar-stack {
+	display: flex;
+	flex-direction: column;
+	gap: var(--fahar-space-5);
+}
+
+.fahar-cluster {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--fahar-space-3);
+}
+
+.fahar-grid {
+	display: grid;
+	gap: var(--fahar-space-5);
+}
+
+@media (min-width: 48rem) {
+	.fahar-page {
+		padding-inline: var(--fahar-page-padding-inline);
+	}
+}

@@ -1,36 +1,35 @@
 <?php
 /**
- * Theme functions and definitions.
+ * Fahar Theme Child bootstrap.
  *
- * For additional information on potential customization options,
- * read the developers' documentation:
- *
- * https://developers.elementor.com/docs/hello-elementor-theme/
- *
- * @package HelloElementorChild
+ * @package Fahar_Theme_Child
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+	exit;
 }
 
-define( 'HELLO_ELEMENTOR_CHILD_VERSION', '2.0.0' );
+$fahar_theme = wp_get_theme();
 
-/**
- * Load child theme scripts & styles.
- *
- * @return void
- */
-function hello_elementor_child_scripts_styles() {
+define( 'FAHAR_THEME_VERSION', $fahar_theme->get( 'Version' ) ?: '1.0.0' );
+define( 'FAHAR_THEME_DIR', get_stylesheet_directory() );
+define( 'FAHAR_THEME_URI', get_stylesheet_directory_uri() );
 
-	wp_enqueue_style(
-		'hello-elementor-child-style',
-		get_stylesheet_directory_uri() . '/style.css',
-		[
-			'hello-elementor-theme-style',
-		],
-		HELLO_ELEMENTOR_CHILD_VERSION
-	);
+$fahar_theme_modules = array(
+	'helpers',
+	'setup',
+	'compatibility',
+	'elementor',
+	'portfolio',
+	'rest-api',
+	'template-routing',
+	'navigation',
+	'assets',
+	'performance',
+);
 
+foreach ( $fahar_theme_modules as $fahar_theme_module ) {
+	require_once FAHAR_THEME_DIR . '/inc/' . $fahar_theme_module . '.php';
 }
-add_action( 'wp_enqueue_scripts', 'hello_elementor_child_scripts_styles', 20 );
+
+unset( $fahar_theme, $fahar_theme_module, $fahar_theme_modules );

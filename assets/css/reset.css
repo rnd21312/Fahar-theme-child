@@ -1,0 +1,28 @@
+/** Safe, minimal normalization for WordPress and Elementor output. */
+html {
+	box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: inherit;
+}
+
+body {
+	margin: 0;
+}
+
+img,
+video {
+	display: block;
+	max-inline-size: 100%;
+	block-size: auto;
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
+}

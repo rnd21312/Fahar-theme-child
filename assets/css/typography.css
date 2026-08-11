@@ -1,0 +1,83 @@
+/** Persian-friendly typography defaults and opt-in Fahar primitives. */
+:where(h1, h2, h3, h4) {
+	color: var(--fahar-color-text-primary);
+	font-family: var(--fahar-font-family-primary);
+	font-weight: var(--fahar-weight-bold);
+	line-height: var(--fahar-line-height-heading);
+}
+
+:where(h1) {
+	font-size: var(--fahar-text-heading-1);
+}
+
+:where(h2) {
+	font-size: var(--fahar-text-heading-2);
+}
+
+:where(h3) {
+	font-size: var(--fahar-text-heading-3);
+}
+
+:where(h4) {
+	font-size: var(--fahar-text-heading-4);
+}
+
+:where(p) {
+	margin-block: 0 var(--fahar-space-4);
+}
+
+.fahar-text-display,
+.fahar-text-h1,
+.fahar-text-h2,
+.fahar-text-h3,
+.fahar-text-body,
+.fahar-text-small,
+.fahar-text-meta {
+	margin-block: 0;
+}
+
+.fahar-text-display {
+	color: var(--fahar-color-text-primary);
+	font-size: var(--fahar-text-heading-1);
+	font-weight: var(--fahar-weight-bold);
+	line-height: var(--fahar-line-height-tight);
+}
+
+.fahar-text-h1 {
+	font-size: var(--fahar-text-heading-1);
+	font-weight: var(--fahar-weight-bold);
+	line-height: var(--fahar-line-height-heading);
+}
+
+.fahar-text-h2 {
+	font-size: var(--fahar-text-heading-2);
+	font-weight: var(--fahar-weight-bold);
+	line-height: var(--fahar-line-height-heading);
+}
+
+.fahar-text-h3 {
+	font-size: var(--fahar-text-heading-3);
+	font-weight: var(--fahar-weight-semibold);
+	line-height: var(--fahar-line-height-heading);
+}
+
+.fahar-text-body {
+	font-size: var(--fahar-text-body);
+	font-weight: var(--fahar-weight-regular);
+	line-height: var(--fahar-line-height-body);
+}
+
+.fahar-text-small {
+	font-size: var(--fahar-text-body-sm);
+	line-height: var(--fahar-line-height-body);
+}
+
+.fahar-text-meta {
+	font-size: var(--fahar-text-meta);
+	font-weight: var(--fahar-weight-medium);
+	line-height: var(--fahar-line-height-relaxed);
+}
+
+.fahar-text-muted {
+	color: var(--fahar-color-text-muted);
+}

@@ -1,0 +1,55 @@
+/** Small, intentional Fahar utilities. */
+.fahar-visually-hidden,
+.fahar-screen-reader-text {
+	position: absolute;
+	inline-size: 1px;
+	block-size: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	border: 0;
+	white-space: nowrap;
+}
+
+.fahar-visually-hidden:focus,
+.fahar-screen-reader-text:focus {
+	z-index: var(--fahar-z-overlay);
+	inset-block-start: var(--fahar-space-3);
+	inset-inline-start: var(--fahar-space-3);
+	inline-size: auto;
+	block-size: auto;
+	margin: 0;
+	padding: var(--fahar-space-3) var(--fahar-space-4);
+	overflow: visible;
+	clip: auto;
+	clip-path: none;
+	border-radius: var(--fahar-radius-sm);
+	background-color: var(--fahar-color-surface-2);
+	color: var(--fahar-color-text-primary);
+}
+
+.fahar-full-width {
+	inline-size: 100%;
+}
+
+.fahar-text-start {
+	text-align: start;
+}
+
+.fahar-text-center {
+	text-align: center;
+}
+
+.fahar-text-end {
+	text-align: end;
+}
+
+.fahar-hidden {
+	display: none;
+}
+
+.fahar-no-margin {
+	margin: 0;
+}

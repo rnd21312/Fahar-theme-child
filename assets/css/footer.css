@@ -1,0 +1,6 @@
+/** Site-footer scaffold. Loaded only by integrations that render it. */
+.fahar-site-footer {
+	padding-block: var(--fahar-space-6);
+	border-block-start: 1px solid var(--fahar-color-border);
+	color: var(--fahar-color-muted);
+}

@@ -1,0 +1,8 @@
+/** Minimal Elementor compatibility; only stable wrappers and Fahar regions. */
+.elementor-page .fahar-app-shell {
+	inline-size: 100%;
+}
+
+.elementor-editor-active .fahar-mobile-nav {
+	position: static;
+}

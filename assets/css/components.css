@@ -1,0 +1,170 @@
+/** Generic, opt-in controls and surfaces for future Fahar screens. */
+.fahar-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--fahar-space-2);
+	min-block-size: 2.75rem;
+	padding-block: var(--fahar-space-2);
+	padding-inline: var(--fahar-space-4);
+	border: 1px solid transparent;
+	border-radius: var(--fahar-radius-md);
+	font-weight: var(--fahar-weight-semibold);
+	line-height: var(--fahar-line-height-tight);
+	text-align: center;
+	text-decoration: none;
+	cursor: pointer;
+	transition:
+		background-color var(--fahar-motion-fast) var(--fahar-ease-standard),
+		border-color var(--fahar-motion-fast) var(--fahar-ease-standard),
+		color var(--fahar-motion-fast) var(--fahar-ease-standard);
+}
+
+.fahar-button--primary {
+	background-color: var(--fahar-color-button);
+	color: var(--fahar-color-button-text);
+}
+
+.fahar-button--primary:hover {
+	background-color: var(--fahar-color-button-hover);
+	color: var(--fahar-color-button-hover-text);
+}
+
+.fahar-button--primary:active {
+	background-color: var(--fahar-color-button-active);
+	color: var(--fahar-color-button-active-text);
+}
+
+.fahar-button--secondary {
+	border-color: var(--fahar-color-border-strong);
+	background-color: var(--fahar-color-control);
+	color: var(--fahar-color-control-text);
+}
+
+.fahar-button--secondary:hover {
+	background-color: var(--fahar-color-control-hover);
+	color: var(--fahar-color-control-hover-text);
+}
+
+.fahar-button--secondary:active {
+	background-color: var(--fahar-color-control-active);
+	color: var(--fahar-color-control-active-text);
+}
+
+.fahar-button--ghost {
+	background-color: transparent;
+	color: var(--fahar-color-control-text);
+}
+
+.fahar-button--ghost:hover {
+	background-color: var(--fahar-color-control-hover);
+	color: var(--fahar-color-control-hover-text);
+}
+
+.fahar-button--ghost:active {
+	background-color: var(--fahar-color-control-active);
+	color: var(--fahar-color-control-active-text);
+}
+
+.fahar-button--icon {
+	inline-size: 2.75rem;
+	padding: 0;
+	border-radius: var(--fahar-radius-round);
+}
+
+.fahar-button[aria-pressed="true"],
+.fahar-button[aria-current="page"] {
+	border-color: var(--fahar-color-button-selected);
+	background-color: var(--fahar-color-button-selected);
+	color: var(--fahar-color-button-selected-text);
+}
+
+.fahar-button:focus-visible,
+.fahar-input:focus-visible,
+.fahar-textarea:focus-visible {
+	outline: var(--fahar-focus-ring-width) solid var(--fahar-color-focus);
+	outline-offset: var(--fahar-focus-ring-offset);
+	box-shadow: var(--fahar-focus-ring);
+}
+
+.fahar-button:disabled,
+.fahar-button[aria-disabled="true"] {
+	border-color: var(--fahar-color-border);
+	background-color: var(--fahar-color-button-disabled);
+	color: var(--fahar-color-button-disabled-text);
+	opacity: 1;
+	cursor: not-allowed;
+}
+
+.fahar-field {
+	display: grid;
+	gap: var(--fahar-space-2);
+	color: var(--fahar-color-text-secondary);
+	font-size: var(--fahar-text-body-sm);
+	font-weight: var(--fahar-weight-medium);
+}
+
+.fahar-input,
+.fahar-textarea {
+	inline-size: 100%;
+	min-block-size: 2.75rem;
+	padding-block: var(--fahar-space-2);
+	padding-inline: var(--fahar-space-3);
+	border: 1px solid var(--fahar-color-border-strong);
+	border-radius: var(--fahar-radius-md);
+	background-color: var(--fahar-color-surface-1);
+	color: var(--fahar-color-text-primary);
+	caret-color: var(--fahar-color-desert-gold);
+	transition:
+		background-color var(--fahar-motion-fast) var(--fahar-ease-standard),
+		border-color var(--fahar-motion-fast) var(--fahar-ease-standard);
+}
+
+.fahar-input::placeholder,
+.fahar-textarea::placeholder {
+	color: var(--fahar-color-text-muted);
+	opacity: 1;
+}
+
+.fahar-input:focus,
+.fahar-textarea:focus {
+	border-color: var(--fahar-color-desert-gold);
+	background-color: var(--fahar-color-surface-2);
+}
+
+.fahar-textarea {
+	min-block-size: 8rem;
+	resize: vertical;
+}
+
+.fahar-input:disabled,
+.fahar-textarea:disabled {
+	border-color: var(--fahar-color-border-subtle);
+	background-color: var(--fahar-color-background-elevated);
+	color: var(--fahar-color-text-muted);
+	cursor: not-allowed;
+}
+
+.fahar-input[aria-invalid="true"],
+.fahar-textarea[aria-invalid="true"] {
+	border-color: var(--fahar-color-error);
+}
+
+.fahar-surface {
+	border: 1px solid var(--fahar-color-border-subtle);
+	border-radius: var(--fahar-radius-lg);
+	background-color: var(--fahar-color-surface-1);
+	box-shadow: var(--fahar-shadow-subtle);
+}
+
+.fahar-surface--raised {
+	background-color: var(--fahar-color-surface-2);
+	box-shadow: var(--fahar-shadow-medium);
+}
+
+.fahar-divider {
+	block-size: 1px;
+	margin-block: var(--fahar-space-5);
+	border: 0;
+	background-color: var(--fahar-color-border-subtle);
+}
