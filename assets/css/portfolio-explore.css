@@ -510,6 +510,11 @@ body.fahar-filter-surface-open {
 }
 
 @media (min-width: 64rem) {
+	.fahar-explore__grid {
+		grid-template-columns: repeat(auto-fill, minmax(min(13rem, 100%), 1fr));
+		gap: var(--fahar-space-3);
+	}
+
 	.fahar-explore__sidebar-inner {
 		grid-template-columns: minmax(0, 1fr) max-content;
 		align-items: start;
@@ -523,6 +528,12 @@ body.fahar-filter-surface-open {
 	.fahar-filter-trigger,
 	.fahar-filter-fallback-trigger {
 		inline-size: auto;
+	}
+}
+
+@media (min-width: 90rem) {
+	.fahar-explore__grid {
+		grid-template-columns: repeat(auto-fill, minmax(min(12rem, 100%), 1fr));
 	}
 }
 
