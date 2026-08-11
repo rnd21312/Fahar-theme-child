@@ -31,6 +31,27 @@ Default task flow:
 
 Final output max 6 short lines: changed files + validation + blocker only if any. No recap, essay, praise, or unsolicited next steps.
 
+## Microtask rule — mandatory
+All implementation work is split into structured microtasks.
+
+One microtask = one small, measurable change in one UI/code concern.
+
+Examples:
+- UI phase 1 / part 1: primary button base style
+- UI phase 1 / part 2: button hover/active/focus states
+- UI phase 1 / part 3: button sizes
+- Explore phase 1 / part 1: remove desktop sidebar layout only
+- Single phase 1 / part 1: media previous/next controls only
+
+A microtask should normally:
+- touch 1–3 files; 4 only when technically inseparable;
+- change one component, state group, behavior, or layout concern;
+- have one clear acceptance condition;
+- avoid unrelated cleanup;
+- avoid completing the next part automatically.
+
+If a requested task is broad, implement only the explicitly named part. Do not expand scope. Phases are organizational labels; each part is executed and validated independently.
+
 ## Architecture
 Keep `functions.php` small. Use existing `inc/` modules. Provider-specific portfolio logic stays behind `inc/portfolio.php`.
 
@@ -101,6 +122,6 @@ Run only what changed:
 Never claim browser/Lighthouse/runtime tests unless actually run.
 
 ## Git
-Do not overwrite unrelated changes. Do not commit/push/merge/amend unless explicitly requested. One task = one focused diff.
+Do not overwrite unrelated changes. Do not commit/push/merge/amend unless explicitly requested. One microtask = one focused diff.
 
 Priority: user request → Fahar brand → data/security/correctness → accessibility → mobile performance → architecture → interaction polish.
