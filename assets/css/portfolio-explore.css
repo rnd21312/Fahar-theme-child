@@ -1,4 +1,4 @@
-/** Pinterest-informed Explore discovery with an RTL-first filter sidebar. */
+/** Pinterest-informed Explore discovery with an RTL-first full-width feed. */
 .fahar-explore .fahar-main {
 	max-inline-size: none;
 	padding-block: var(--fahar-space-2) var(--fahar-space-6);
@@ -506,66 +506,6 @@ body.fahar-filter-surface-open {
 	.fahar-explore__grid {
 		grid-template-columns: repeat(auto-fill, minmax(min(10.75rem, 100%), 1fr));
 		gap: var(--fahar-space-3);
-	}
-}
-
-@media (min-width: 64rem) {
-	.fahar-explore__layout {
-		grid-template-columns: clamp(14rem, 18vw, 18rem) minmax(0, 1fr);
-		align-items: start;
-		gap: clamp(var(--fahar-space-4), 2vw, var(--fahar-space-6));
-	}
-
-	.fahar-explore__sidebar {
-		grid-column: 1;
-		grid-row: 1;
-	}
-
-	.fahar-explore__results {
-		grid-column: 2;
-		grid-row: 1;
-		margin-block-start: 0;
-	}
-
-	.fahar-explore__sidebar-inner {
-		position: sticky;
-		inset-block-start: calc(var(--fahar-header-height) + var(--fahar-space-3));
-		max-block-size: calc(100dvh - var(--fahar-header-height) - (2 * var(--fahar-space-3)));
-		padding: var(--fahar-space-3);
-		border: 1px solid var(--fahar-color-border);
-		border-radius: var(--fahar-radius-lg);
-		background: var(--fahar-color-surface);
-		overflow-y: auto;
-		overscroll-behavior: contain;
-		scrollbar-width: thin;
-	}
-
-	.fahar-filter-trigger,
-	.fahar-filter-fallback-trigger,
-	.fahar-filter-backdrop,
-	.fahar-filter-panel__header {
-		display: none;
-	}
-
-	.fahar-filter-panel {
-		position: static;
-		max-block-size: none;
-		border: 0;
-		border-radius: 0;
-		background: transparent;
-		box-shadow: none;
-		overflow: visible;
-		animation: none;
-	}
-
-	details.fahar-filter-disclosure:not([open]) > .fahar-filter-panel {
-		display: block;
-	}
-
-	.fahar-filter-panel__body {
-		max-block-size: none;
-		padding: 0;
-		overflow: visible;
 	}
 }
 
