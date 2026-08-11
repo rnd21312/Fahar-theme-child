@@ -21,10 +21,10 @@
 			30rem
 		);
 		margin-inline: auto;
-		border: 1px solid var(--fahar-color-border-subtle);
-		border-radius: 200px;
+		border: 1px solid color-mix(in srgb, var(--fahar-color-accent) 18%, var(--fahar-color-border-strong));
+		border-radius: var(--fahar-radius-xl);
 		background-color: var(--fahar-color-surface-1);
-		box-shadow: var(--fahar-shadow-medium);
+		box-shadow: var(--fahar-shadow-subtle);
 		isolation: isolate;
 	}
 
@@ -137,13 +137,6 @@
 		white-space: nowrap;
 	}
 
-	@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-		.fahar-mobile-nav {
-			background-color: color-mix(in srgb, var(--fahar-color-surface-1) 88%, transparent);
-			-webkit-backdrop-filter: blur(14px) saturate(1.12);
-			backdrop-filter: blur(14px) saturate(1.12);
-		}
-	}
 
 	body.elementor-editor-active.fahar-has-mobile-nav {
 		padding-block-end: 0;
