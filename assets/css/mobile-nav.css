@@ -30,14 +30,15 @@
 
 	.fahar-mobile-nav__inner {
 		min-block-size: var(--fahar-mobile-nav-height);
-		padding: var(--fahar-space-1);
+		padding-block: var(--fahar-space-2);
+		padding-inline: var(--fahar-space-1);
 	}
 
 	.fahar-mobile-nav__list {
 		display: flex;
-		align-items: stretch;
-		gap: var(--fahar-space-2);
-		min-block-size: calc(var(--fahar-mobile-nav-height) - (2 * var(--fahar-space-1)));
+		align-items: center;
+		gap: var(--fahar-space-1);
+		min-block-size: calc(var(--fahar-mobile-nav-height) - (2 * var(--fahar-space-2)));
 		margin: 0;
 		padding: 0;
 		list-style: none;
@@ -55,9 +56,9 @@
 		flex: 1 1 auto;
 		align-items: center;
 		justify-content: center;
-		min-block-size: 3.5rem;
+		min-block-size: 2.75rem;
 		padding-block: var(--fahar-space-1);
-		padding-inline: var(--fahar-space-2);
+		padding-inline: var(--fahar-space-1);
 		border: 1px solid transparent;
 		border-radius: var(--fahar-radius-pill);
 		background-color: transparent;
