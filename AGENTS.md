@@ -4,8 +4,9 @@
 Build Fahar as a fast, Persian/RTL-first, app-like WordPress portfolio.
 
 - Parent: `hello-elementor`
-- UX reference: Pinterest interaction/layout patterns
-- Brand: Fahar Dark + Desert Gold
+- Primary visual/brand source: live `https://fahar.ir/`
+- Behavioral reference: Pinterest only for discovery/app interaction patterns not defined by the live Fahar site
+- Brand: preserve the visual identity of `fahar.ir`; current theme tokens remain authoritative until a live visual check justifies a change
 - Existing WordPress/Elementor content is authoritative; never rebuild or migrate it unless explicitly asked.
 - This child theme is the presentation layer, not a general application plugin.
 
@@ -48,24 +49,34 @@ Functionality that should survive a theme switch belongs in a future companion p
 Use existing helpers before creating abstractions. Keep provider-specific portfolio logic behind `inc/portfolio.php`.
 
 ## UI/UX — mandatory
-Any task changing visible UI, layout, interaction, responsive behavior, motion, or navigation must:
+Any task changing visible UI, layout, interaction, responsive behavior, motion, navigation, or reusable UI components must:
 
 - load and apply the installed **UI UX Pro Max** skill before UI/UX decisions;
-- stop and report if that skill is unavailable;
-- use Pinterest as the primary high-fidelity reference for hierarchy, density, discovery, card/media behavior, navigation, and interaction;
-- preserve Fahar Dark + Desert Gold and Persian/RTL-first behavior;
+- load and apply the repo-local **`fahar-ui-system`** skill from `.agents/skills/fahar-ui-system/`;
+- stop and report if either required UI skill is unavailable;
+- use live `fahar.ir` as the primary source for Fahar visual identity: palette, typography feel, geometry, density, surfaces, controls, and brand character;
+- use Pinterest only as a secondary behavioral reference for portfolio discovery, masonry, feed/detail flow, and related app patterns where `fahar.ir` has no equivalent interaction;
 - never copy Pinterest branding, red, proprietary assets, screenshots, or source code;
 - prefer media-first, compact app-like UI over traditional WordPress chrome;
 - avoid excessive glow, gradients, glass, shadows, and decorative DOM.
 
+If live `fahar.ir` cannot be visually checked during a task, do not invent exact brand values. Preserve the existing verified Fahar tokens/components and state the verification limitation.
+
 Validate relevant mobile, desktop, RTL, keyboard/focus, touch, and reduced-motion states.
 
 ## Design system
-Source of truth: `assets/css/tokens.css`.
+Canonical sources:
 
-Use existing `--fahar-*` tokens for repeated colors/states, spacing, radius, shadows, typography, containers, motion, focus, and navigation dimensions. Primary accent: Desert Gold. Class prefix: `fahar-`.
+- `assets/css/tokens.css` — semantic/global values
+- `assets/css/components.css` — reusable primitive controls/surfaces
+- component-specific CSS such as `portfolio-card.css` and `mobile-nav.css` — reusable complex components
+- `.agents/skills/fahar-ui-system/references/` — component/pattern contracts for Codex
 
-Prefer logical CSS properties and native modern CSS. Avoid CSS frameworks, utility explosions, brittle Elementor selectors, and unnecessary `!important`.
+Use existing `--fahar-*` tokens for repeated colors/states, spacing, radius, shadows, typography, containers, motion, focus, and navigation dimensions. Class prefix: `fahar-`.
+
+Page/screen CSS may compose components and own layout, but must not silently redefine canonical buttons, fields, surfaces, chips, badges, cards, or navigation primitives. If a visual pattern will be reused, promote it to the design system instead of copying styles between screens.
+
+Prefer logical CSS properties and native modern CSS. Avoid CSS frameworks, utility explosions, brittle Elementor selectors, raw repeated design values, and unnecessary `!important`.
 
 ## Portfolio media contract
 `fahar_theme_get_portfolio_media_items()` defines Single Portfolio media order:
@@ -115,6 +126,8 @@ Treat content/meta as untrusted: sanitize, escape, validate, restrict iframe pro
 ## Relevant-file map
 Open the smallest useful set.
 
+**Design-system/UI task:** `.agents/skills/fahar-ui-system/SKILL.md`, only the relevant reference file, `assets/css/tokens.css`, and the relevant component/page CSS.
+
 **Mobile nav:** `template-parts/navigation/mobile-bottom-nav.php`, `assets/css/mobile-nav.css`, `inc/navigation.php`, tokens only if needed.
 
 **Explore:** relevant Explore template/parts, `assets/css/portfolio-explore.css`, `assets/css/portfolio-card.css`, `assets/js/portfolio-explore.js`; open `inc/portfolio.php` only for data behavior.
@@ -144,6 +157,7 @@ No frontend build pipeline is required. Run only relevant checks:
 
 - PHP: `php -l path/to/changed.php`
 - JS: `node --check path/to/changed.js`
+- Design-system CSS: `python tools/check-ui-system.py path/to/changed.css ...`
 - General: `git diff --check`
 
 For UI tasks, validate applicable mobile/desktop/RTL/focus/touch/reduced-motion/Elementor/no-JS states. Never claim browser or WordPress runtime testing unless it actually ran.
@@ -156,6 +170,6 @@ Prefer commit forms such as `ui(explore): remove desktop sidebar`, `ui(single): 
 Final response: only concise **Summary**, **Files changed**, **Validation**, and one **Next** recommendation. Do not restate project context or paste unchanged code.
 
 ## Priority
-If requirements conflict: explicit user request → data/content preservation → security/correctness → accessibility → mobile performance → existing architecture → UI/UX parity → visual polish.
+If requirements conflict: explicit user request → Fahar live brand identity → data/content preservation → security/correctness → accessibility → mobile performance → existing architecture → interaction reference parity → visual polish.
 
 Make the smallest high-quality change that moves Fahar toward a fast, accessible, Persian-first portfolio application.
