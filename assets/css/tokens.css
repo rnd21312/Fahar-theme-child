@@ -1,8 +1,10 @@
 /**
  * Fahar Design Tokens v1.
  *
- * Dark, Persian-first foundations for Fahar-owned frontend presentation.
- * The Desert Gold value is provisional until the final brand palette is approved.
+ * Canonical implemented tokens for Fahar-owned frontend presentation.
+ * Keep these values stable unless a task can visually verify a deliberate
+ * brand change against the live fahar.ir reference or the user explicitly
+ * provides an approved replacement palette/type scale.
  */
 :root {
 	color-scheme: dark;
