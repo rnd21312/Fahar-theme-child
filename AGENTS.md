@@ -23,13 +23,13 @@ Act as a coding agent, not a consultant.
 - Do not refactor unrelated code.
 - Do not create speculative abstractions.
 - Prefer existing helpers/tokens/components.
-- Patch → validate → commit → push → stop.
+- Patch → validate → stop.
 - Ask only when blocked by a decision that cannot safely be inferred.
 
 Default task flow:
-`git status` → inspect 2–5 relevant files → edit → smallest validation → `git diff --check` → commit → push → stop.
+`git status` → inspect 2–5 relevant files → edit → smallest validation → `git diff --check` → stop.
 
-Final output max 6 short lines: changed files + validation + pushed commit SHA + blocker only if any. No recap, essay, praise, or unsolicited next steps.
+Final output max 6 short lines: changed files + validation + blocker only if any. No recap, essay, praise, or unsolicited next steps.
 
 ## Microtask rule — mandatory
 All implementation work is split into structured microtasks.
@@ -122,6 +122,6 @@ Run only what changed:
 Never claim browser/Lighthouse/runtime tests unless actually run.
 
 ## Git
-Do not overwrite unrelated changes. Each microtask must create one focused commit and push it to the current working branch unless the task explicitly says not to push. Never amend/rebase/force-push unless explicitly requested.
+Do not overwrite unrelated changes. Do not commit/push/merge/amend unless explicitly requested. One microtask = one focused diff.
 
 Priority: user request → Fahar brand → data/security/correctness → accessibility → mobile performance → architecture → interaction polish.
