@@ -509,6 +509,23 @@ body.fahar-filter-surface-open {
 	}
 }
 
+@media (min-width: 64rem) {
+	.fahar-explore__sidebar-inner {
+		grid-template-columns: minmax(0, 1fr) max-content;
+		align-items: start;
+	}
+
+	.fahar-explore-search {
+		inline-size: 100%;
+	}
+
+	.fahar-explore-discovery,
+	.fahar-filter-trigger,
+	.fahar-filter-fallback-trigger {
+		inline-size: auto;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.fahar-explore-search__field,
 	.fahar-filter-option {
