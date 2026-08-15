@@ -146,10 +146,12 @@
 		color var(--fahar-motion-fast) var(--fahar-ease-standard);
 }
 
-.fahar-portfolio-slider__button:hover:not(:disabled) {
-	border-color: var(--fahar-color-border-strong);
-	background: var(--fahar-color-control-hover);
-	color: var(--fahar-color-control-hover-text);
+@media (hover: hover) {
+	.fahar-portfolio-slider__button:hover:not(:disabled) {
+		border-color: var(--fahar-color-border-strong);
+		background: var(--fahar-color-control-hover);
+		color: var(--fahar-color-control-hover-text);
+	}
 }
 
 .fahar-portfolio-slider__button:active:not(:disabled) {

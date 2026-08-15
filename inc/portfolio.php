@@ -1236,6 +1236,10 @@ function fahar_theme_get_portfolio_content_media_items( $post, $title ) {
 		$walk( $block );
 	}
 
+	if ( function_exists( 'fahar_theme_get_elementor_portfolio_media_items' ) ) {
+		$items = array_merge( $items, fahar_theme_get_elementor_portfolio_media_items( $post, $title ) );
+	}
+
 	return $items;
 }
 
@@ -1573,11 +1577,6 @@ function fahar_theme_get_portfolio_media_items( $post = null ) {
 
 	$append_image( $featured_image_id, 'featured-image', 'full' );
 
-	if ( ! $featured_image_id ) {
-		$fallback_cover_id = $astra_cover_id ? $astra_cover_id : $lightbox_image_id;
-		$append_image( $fallback_cover_id, $astra_cover_id ? 'astra-cover' : 'astra-lightbox', 'full' );
-	}
-
 	$content_transform = fahar_theme_get_portfolio_content_transform( $post );
 
 	foreach ( $content_transform['media'] as $content_item ) {
@@ -1588,7 +1587,7 @@ function fahar_theme_get_portfolio_media_items( $post = null ) {
 		}
 	}
 
-	$append_image( $astra_cover_id, 'astra-cover', 'large' );
+	$append_image( $astra_cover_id, 'astra-cover', $featured_image_id ? 'large' : 'full' );
 	$append_image( $lightbox_image_id, 'astra-lightbox', 'full' );
 
 	$video_source = fahar_theme_get_portfolio_video_source( $post );
