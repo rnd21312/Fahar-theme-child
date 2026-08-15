@@ -58,10 +58,6 @@
 .fahar-explore-search__field:focus-within {
 	border-color: var(--fahar-color-border-strong);
 	background-color: var(--fahar-color-surface-active);
-	box-shadow: none;
-}
-
-.fahar-explore-search__field:has(.fahar-explore-search__input:focus-visible) {
 	box-shadow: var(--fahar-focus-ring);
 }
 
@@ -141,7 +137,7 @@
 	inset-block-start: calc(100% + var(--fahar-space-2));
 	inset-inline: 0;
 	display: grid;
-	max-block-size: min(22rem, calc(100dvh - var(--fahar-mobile-nav-height) - 10rem - env(safe-area-inset-bottom)));
+	max-block-size: min(22rem, max(12rem, calc(100dvh - var(--fahar-mobile-nav-height) - 10rem - env(safe-area-inset-bottom))));
 	margin: 0;
 	padding: var(--fahar-space-2);
 	border: 1px solid var(--fahar-color-border-strong);
@@ -395,11 +391,14 @@
 
 .fahar-filter-option[aria-current="page"] {
 	border-color: transparent;
-	border-inline-start-color: var(--fahar-color-accent);
-	border-inline-start-width: var(--fahar-accent-marker-width);
 	background: var(--fahar-color-control-selected);
 	color: var(--fahar-color-control-selected-text);
 	font-weight: var(--fahar-weight-semibold);
+}
+
+.fahar-filter-options:not(.fahar-filter-options--tags) .fahar-filter-option[aria-current="page"] {
+	border-inline-start-color: var(--fahar-color-accent);
+	border-inline-start-width: var(--fahar-accent-marker-width);
 }
 
 .fahar-filter-option span {
@@ -547,9 +546,12 @@ body.fahar-filter-surface-open {
 
 	.fahar-filter-option[aria-current="page"]:hover {
 		border-color: transparent;
-		border-inline-start-color: var(--fahar-color-accent);
 		background: var(--fahar-color-control-selected);
 		color: var(--fahar-color-control-selected-text);
+	}
+
+	.fahar-filter-options:not(.fahar-filter-options--tags) .fahar-filter-option[aria-current="page"]:hover {
+		border-inline-start-color: var(--fahar-color-accent);
 	}
 
 	.fahar-explore-search__clear:hover {
@@ -606,11 +608,6 @@ body.fahar-filter-surface-open {
 }
 
 @media (min-width: 48rem) {
-	.fahar-explore__sidebar-inner {
-		grid-template-columns: minmax(0, 1fr) max-content;
-		align-items: end;
-	}
-
 	.fahar-explore__grid {
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: var(--fahar-space-3);
@@ -630,6 +627,11 @@ body.fahar-filter-surface-open {
 		grid-row: 1 / span 2;
 		align-self: start;
 		max-block-size: calc(100svh - var(--fahar-header-height) - (2 * var(--fahar-space-3)));
+		padding: var(--fahar-space-4);
+		border: 1px solid var(--fahar-color-border-subtle);
+		border-radius: var(--fahar-radius-lg);
+		background: var(--fahar-color-surface);
+		overflow: hidden;
 	}
 
 	.fahar-explore__results {
@@ -645,8 +647,7 @@ body.fahar-filter-surface-open {
 		grid-template-columns: minmax(0, 1fr);
 		align-items: start;
 		gap: var(--fahar-space-5);
-		max-block-size: inherit;
-		padding-inline-end: var(--fahar-space-1);
+		max-block-size: calc(100svh - var(--fahar-header-height) - (2 * var(--fahar-space-3)) - (2 * var(--fahar-space-4)));
 		overflow-y: auto;
 		overscroll-behavior: contain;
 		scrollbar-color: var(--fahar-color-border-strong) transparent;
