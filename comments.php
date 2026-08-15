@@ -61,7 +61,7 @@ $fahar_comment_count = get_comments_number();
 			array(
 				'class_container' => 'comment-respond fahar-comment-respond',
 				'class_form'      => 'comment-form fahar-comment-form',
-				'class_submit'    => 'submit fahar-comment-form__submit',
+				'class_submit'    => 'submit fahar-button fahar-button--primary fahar-comment-form__submit',
 				'label_submit'    => esc_html__( 'ارسال دیدگاه', 'fahar-theme-child' ),
 				'title_reply'     => esc_html__( 'دیدگاه خود را بنویسید', 'fahar-theme-child' ),
 			)

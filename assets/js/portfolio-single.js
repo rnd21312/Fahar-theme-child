@@ -149,12 +149,20 @@
 
 		const formatNumber = (value) => numberFormatter ? numberFormatter.format(value) : value;
 		const counterTemplate = counter.dataset.counterTemplate;
+		const counterAriaTemplate = counter.dataset.counterAriaTemplate;
 
-		if (!counterTemplate || !counterTemplate.includes('%1$s') || !counterTemplate.includes('%2$s')) {
+		if (
+			!counterTemplate
+			|| !counterTemplate.includes('%1$s')
+			|| !counterTemplate.includes('%2$s')
+			|| !counterAriaTemplate
+			|| !counterAriaTemplate.includes('%1$s')
+			|| !counterAriaTemplate.includes('%2$s')
+		) {
 			return;
 		}
 
-		const formatCounter = (index) => counterTemplate
+		const formatCounter = (template, index) => template
 			.replace('%1$s', formatNumber(index + 1))
 			.replace('%2$s', formatNumber(slides.length));
 		const ratios = new Map(slides.map((slide) => [slide, 0]));
@@ -181,7 +189,8 @@
 			slides[currentIndex].setAttribute('aria-current', 'true');
 			previousButton.disabled = currentIndex === 0;
 			nextButton.disabled = currentIndex === slides.length - 1;
-			counter.textContent = formatCounter(currentIndex);
+			counter.textContent = formatCounter(counterTemplate, currentIndex);
+			counter.setAttribute('aria-label', formatCounter(counterAriaTemplate, currentIndex));
 		};
 
 		const navigateTo = (nextIndex) => {

@@ -85,7 +85,7 @@ $fahar_header_has_meta     = (bool) ( $fahar_header_type_label || $fahar_header_
 		<div class="fahar-portfolio-actions">
 			<div class="fahar-portfolio-actions__primary">
 				<a
-					class="fahar-portfolio-action fahar-portfolio-action--external"
+					class="fahar-button fahar-button--primary fahar-portfolio-action fahar-portfolio-action--external"
 					href="<?php echo esc_url( $fahar_header_external_url ); ?>"
 					target="_blank"
 					rel="noopener noreferrer"

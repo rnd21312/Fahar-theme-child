@@ -15,9 +15,18 @@ if ( ! $fahar_media_post instanceof WP_Post || ! fahar_theme_is_portfolio_post( 
 	return;
 }
 
-$fahar_media_items     = fahar_theme_get_portfolio_media_items( $fahar_media_post );
-$fahar_media_count     = count( $fahar_media_items );
-$fahar_media_is_slider = $fahar_media_count > 1;
+$fahar_media_items         = fahar_theme_get_portfolio_media_items( $fahar_media_post );
+$fahar_media_count         = count( $fahar_media_items );
+$fahar_media_is_slider     = $fahar_media_count > 1;
+$fahar_media_viewport_id   = $fahar_media_is_slider ? wp_unique_id( 'fahar-portfolio-slider-viewport-' ) : '';
+$fahar_media_counter_label = $fahar_media_is_slider
+	? sprintf(
+		/* translators: 1: current slide number, 2: total slide count. */
+		__( 'اسلاید %1$s از %2$s', 'fahar-theme-child' ),
+		number_format_i18n( 1 ),
+		number_format_i18n( $fahar_media_count )
+	)
+	: '';
 ?>
 <div
 	class="fahar-portfolio-media<?php echo $fahar_media_is_slider ? ' fahar-portfolio-slider' : ''; ?>"
@@ -29,6 +38,7 @@ $fahar_media_is_slider = $fahar_media_count > 1;
 >
 	<?php if ( $fahar_media_items ) : ?>
 		<div
+			<?php if ( $fahar_media_viewport_id ) : ?>id="<?php echo esc_attr( $fahar_media_viewport_id ); ?>"<?php endif; ?>
 			class="fahar-portfolio-slider__viewport"
 			<?php if ( $fahar_media_is_slider ) : ?>tabindex="0"<?php endif; ?>
 		>
@@ -48,6 +58,7 @@ $fahar_media_is_slider = $fahar_media_count > 1;
 							role="group"
 							aria-roledescription="<?php esc_attr_e( 'اسلاید', 'fahar-theme-child' ); ?>"
 							aria-label="<?php echo esc_attr( $fahar_media_slide_label ); ?>"
+							<?php if ( 0 === $fahar_media_index ) : ?>aria-current="true"<?php endif; ?>
 						<?php endif; ?>
 					>
 						<?php
@@ -68,21 +79,24 @@ $fahar_media_is_slider = $fahar_media_count > 1;
 					class="fahar-portfolio-slider__button fahar-portfolio-slider__prev"
 					type="button"
 					aria-label="<?php esc_attr_e( 'اسلاید قبلی', 'fahar-theme-child' ); ?>"
+					aria-controls="<?php echo esc_attr( $fahar_media_viewport_id ); ?>"
 					disabled
 				>
-					<?php esc_html_e( 'قبلی', 'fahar-theme-child' ); ?>
+					<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m15 18-6-6 6-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
 				</button>
 				<span
 					class="fahar-portfolio-slider__counter"
 					role="status"
 					aria-live="polite"
 					aria-atomic="true"
-					data-counter-template="<?php esc_attr_e( 'اسلاید %1$s از %2$s', 'fahar-theme-child' ); ?>"
+					aria-label="<?php echo esc_attr( $fahar_media_counter_label ); ?>"
+					data-counter-template="<?php esc_attr_e( '%1$s / %2$s', 'fahar-theme-child' ); ?>"
+					data-counter-aria-template="<?php esc_attr_e( 'اسلاید %1$s از %2$s', 'fahar-theme-child' ); ?>"
 				>
 					<?php
 					printf(
 						/* translators: 1: current slide number, 2: total slide count. */
-						esc_html__( 'اسلاید %1$s از %2$s', 'fahar-theme-child' ),
+						esc_html__( '%1$s / %2$s', 'fahar-theme-child' ),
 						esc_html( number_format_i18n( 1 ) ),
 						esc_html( number_format_i18n( $fahar_media_count ) )
 					);
@@ -92,8 +106,9 @@ $fahar_media_is_slider = $fahar_media_count > 1;
 					class="fahar-portfolio-slider__button fahar-portfolio-slider__next"
 					type="button"
 					aria-label="<?php esc_attr_e( 'اسلاید بعدی', 'fahar-theme-child' ); ?>"
+					aria-controls="<?php echo esc_attr( $fahar_media_viewport_id ); ?>"
 				>
-					<?php esc_html_e( 'بعدی', 'fahar-theme-child' ); ?>
+					<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
 				</button>
 			</div>
 		<?php endif; ?>
@@ -107,6 +122,8 @@ unset(
 	$fahar_media_items,
 	$fahar_media_count,
 	$fahar_media_is_slider,
+	$fahar_media_viewport_id,
+	$fahar_media_counter_label,
 	$fahar_media_index,
 	$fahar_media_slide_label,
 	$fahar_media_item
