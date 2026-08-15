@@ -35,4 +35,20 @@ The child theme owns presentation. A future `fahar-elementor-core` plugin will o
 
 There is intentionally no Node or Composer build pipeline. Edit PHP, CSS, and JavaScript directly. Follow WordPress escaping and internationalization conventions, use the `fahar_theme_` PHP prefix, and keep direction-aware layout expressed with CSS logical properties. Run the checks in [Development](docs/DEVELOPMENT.md) before opening a pull request.
 
+## Build an installable theme
+
+Create the versioned WordPress theme ZIP with the dependency-free PowerShell builder:
+
+```powershell
+.\tools\build-theme.ps1
+```
+
+The archive is written to `build\fahar-theme-child-{VERSION}.zip`, using the `Version:` header in `style.css`. If local execution policy blocks scripts, use:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\build-theme.ps1
+```
+
+PowerShell 7 users may alternatively run `pwsh -NoProfile -File .\tools\build-theme.ps1`.
+
 The original upstream `readme.txt` is retained for provenance; this file is the active project documentation.
