@@ -222,7 +222,7 @@
 	display: inline-flex;
 	align-items: center;
 	min-block-size: 2.75rem;
-	color: var(--fahar-color-button);
+	color: var(--fahar-color-text-secondary);
 	font-weight: var(--fahar-weight-semibold);
 	text-underline-offset: 0.18em;
 }
@@ -452,7 +452,7 @@ body.fahar-filter-surface-open {
 	inline-size: 1.25rem;
 	block-size: 1.25rem;
 	border: 2px solid var(--fahar-color-border-strong);
-	border-block-start-color: var(--fahar-color-accent);
+	border-block-start-color: var(--fahar-color-text-secondary);
 	border-radius: var(--fahar-radius-round);
 }
 
@@ -521,14 +521,14 @@ body.fahar-filter-surface-open {
 	}
 
 	.fahar-filter-option[aria-current="page"]:hover {
-		border-color: var(--fahar-color-button-hover);
-		background: var(--fahar-color-button-hover);
-		color: var(--fahar-color-button-hover-text);
+		border-color: var(--fahar-color-border-strong);
+		background: var(--fahar-color-control-hover);
+		color: var(--fahar-color-control-hover-text);
 	}
 
 	.fahar-explore-search__clear:hover,
 	.fahar-filter-reset:hover {
-		color: var(--fahar-color-button-hover);
+		color: var(--fahar-color-text-primary);
 	}
 }
 
@@ -547,7 +547,7 @@ body.fahar-filter-surface-open {
 
 .fahar-explore-search__clear:active,
 .fahar-filter-reset:active {
-	color: var(--fahar-color-button-active);
+	color: var(--fahar-color-text-primary);
 }
 
 .fahar-filter-trigger:focus-visible,
@@ -573,14 +573,45 @@ body.fahar-filter-surface-open {
 
 @media (min-width: 48rem) {
 	.fahar-explore__grid {
-		grid-template-columns: repeat(auto-fill, minmax(min(10.75rem, 100%), 1fr));
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: var(--fahar-space-3);
 	}
 }
 
 @media (min-width: 64rem) {
+	.fahar-explore__layout {
+		grid-template-columns: clamp(14rem, 18vw, 17rem) minmax(0, 1fr);
+		align-items: start;
+		column-gap: var(--fahar-space-5);
+	}
+
+	.fahar-explore__sidebar {
+		grid-row: 1 / span 2;
+	}
+
+	.fahar-explore-active,
+	.fahar-explore__results {
+		grid-column: 2;
+	}
+
+	.fahar-explore__results {
+		margin-block-start: 0;
+	}
+
+	.fahar-explore__sidebar-inner {
+		position: sticky;
+		inset-block-start: calc(var(--fahar-header-height) + var(--fahar-space-3));
+		grid-template-columns: minmax(0, 1fr);
+		align-items: start;
+		max-block-size: calc(100svh - var(--fahar-header-height) - (2 * var(--fahar-space-3)));
+		padding-inline-end: var(--fahar-space-1);
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		scrollbar-width: thin;
+	}
+
 	.fahar-explore__grid {
-		grid-template-columns: repeat(auto-fill, minmax(min(13rem, 100%), 1fr));
+		grid-template-columns: repeat(4, minmax(0, 1fr));
 		gap: var(--fahar-space-3);
 	}
 
@@ -591,29 +622,49 @@ body.fahar-filter-surface-open {
 	.fahar-explore-discovery,
 	.fahar-filter-trigger,
 	.fahar-filter-fallback-trigger {
-		inline-size: auto;
+		inline-size: 100%;
+	}
+
+	.fahar-filter-trigger,
+	.fahar-filter-fallback-trigger,
+	.fahar-filter-panel__header,
+	.fahar-filter-backdrop {
+		display: none;
+	}
+
+	.fahar-filter-disclosure,
+	.fahar-filter-disclosure:not([open]) > .fahar-filter-panel {
+		display: block;
 	}
 
 	.fahar-explore-discovery.is-enhanced.is-open .fahar-filter-backdrop {
 		display: none;
 	}
 
+	.fahar-filter-panel,
 	.fahar-explore-discovery.is-enhanced .fahar-filter-panel {
-		position: absolute;
-		z-index: var(--fahar-z-sticky);
-		inset-block-start: calc(100% + var(--fahar-space-2));
-		inset-block-end: auto;
-		inset-inline: auto 0;
-		inline-size: min(22rem, calc(100vw - (2 * var(--fahar-page-padding-inline))));
-		max-block-size: min(32rem, 70dvh);
-		border-block-end: 1px solid var(--fahar-color-border-strong);
-		border-radius: var(--fahar-radius-lg);
-		box-shadow: var(--fahar-shadow-medium);
+		position: static;
+		inline-size: 100%;
+		max-block-size: none;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+		box-shadow: none;
+		animation: none;
+		overflow: visible;
 	}
 
+	.fahar-filter-panel__body,
 	.fahar-explore-discovery.is-enhanced .fahar-filter-panel__body {
-		max-block-size: min(27rem, calc(70dvh - 4.5rem));
-		padding-block-end: var(--fahar-space-4);
+		max-block-size: none;
+		padding: var(--fahar-space-2) 0 0;
+		overflow: visible;
+	}
+}
+
+@media (min-width: 80rem) {
+	.fahar-explore__grid {
+		grid-template-columns: repeat(5, minmax(0, 1fr));
 	}
 }
 

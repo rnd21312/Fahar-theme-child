@@ -113,7 +113,9 @@ $fahar_media_counter_label = $fahar_media_is_slider
 			</div>
 		<?php endif; ?>
 	<?php else : ?>
-		<div class="fahar-portfolio-media__placeholder" aria-hidden="true"></div>
+		<p class="fahar-portfolio-media__empty" role="status">
+			<?php esc_html_e( 'رسانه‌ای برای این پروژه ثبت نشده است.', 'fahar-theme-child' ); ?>
+		</p>
 	<?php endif; ?>
 </div>
 <?php

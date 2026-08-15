@@ -9,17 +9,20 @@
 :root {
 	color-scheme: dark;
 
-	/* Color: canonical warm-dark palette and Desert Gold interaction states. */
-	--fahar-color-bg: #0e0d0b;
-	--fahar-color-surface: #191712;
-	--fahar-color-surface-elevated: #211e17;
-	--fahar-color-surface-active: #15130f;
-	--fahar-color-surface-disabled: #2a261d;
-	--fahar-color-text: #f4f0e6;
-	--fahar-color-text-secondary: #c9c1b2;
-	--fahar-color-text-muted: #91897c;
-	--fahar-color-border: rgb(244 240 230 / 10%);
-	--fahar-color-border-strong: rgb(244 240 230 / 22%);
+	/* Color: neutral dark surfaces with Desert Gold reserved for primary brand actions. */
+	--fahar-color-bg: #0a0a0a;
+	--fahar-color-surface: #171717;
+	--fahar-color-surface-elevated: #202020;
+	--fahar-color-surface-active: #121212;
+	--fahar-color-surface-disabled: #2d2d2d;
+	--fahar-color-text: #fff;
+	--fahar-color-text-secondary: #e5e5e5;
+	--fahar-color-text-muted: #a3a3a3;
+	--fahar-color-border: rgb(255 255 255 / 10%);
+	--fahar-color-border-strong: rgb(255 255 255 / 22%);
+	--fahar-color-media-overlay: rgb(0 0 0 / 72%);
+	--fahar-color-media-overlay-soft: rgb(0 0 0 / 18%);
+	--fahar-color-media-overlay-border: rgb(255 255 255 / 26%);
 	--fahar-color-accent: #d6a84b;
 	--fahar-color-accent-hover: #e2ba63;
 	--fahar-color-accent-active: #b98931;
@@ -45,8 +48,8 @@
 	--fahar-color-control-hover-text: var(--fahar-color-text);
 	--fahar-color-control-active: var(--fahar-color-surface-active);
 	--fahar-color-control-active-text: var(--fahar-color-text);
-	--fahar-color-control-selected: var(--fahar-color-button-selected);
-	--fahar-color-control-selected-text: var(--fahar-color-button-selected-text);
+	--fahar-color-control-selected: #303030;
+	--fahar-color-control-selected-text: var(--fahar-color-text);
 	--fahar-color-control-disabled: var(--fahar-color-button-disabled);
 	--fahar-color-control-disabled-text: var(--fahar-color-button-disabled-text);
 	--fahar-color-success: #67b98b;

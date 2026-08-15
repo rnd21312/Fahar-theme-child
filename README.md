@@ -43,7 +43,17 @@ Create the versioned WordPress theme ZIP with the dependency-free PowerShell bui
 .\tools\build-theme.ps1
 ```
 
-The archive is written to `build\fahar-theme-child-{VERSION}.zip`, using the `Version:` header in `style.css`. If local execution policy blocks scripts, use:
+The archive is written to `build\fahar-theme-child-{VERSION}.zip`, using the `Version:` header in `style.css`. Its default package root is `fahar-theme-child/`.
+
+The package root is the WordPress theme directory identity; it is separate from the theme name, text domain, and versioned ZIP filename. To replace an existing manually installed theme, this value must exactly match its current directory under `wp-content/themes`. If production uses a different directory, build with:
+
+Production theme directory must be confirmed before claiming that an uploaded ZIP will replace the installed theme.
+
+```powershell
+.\tools\build-theme.ps1 -ThemeDirectoryName "EXISTING-DIRECTORY"
+```
+
+If local execution policy blocks scripts, use:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\build-theme.ps1

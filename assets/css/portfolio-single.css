@@ -1,12 +1,13 @@
 /** Single Portfolio structural shell. */
 .fahar-portfolio-single {
-	padding-block: var(--fahar-space-4) var(--fahar-space-7);
+	padding-block: var(--fahar-space-3) calc(var(--fahar-mobile-nav-height) + var(--fahar-space-6));
 	padding-inline: var(--fahar-page-padding-inline-mobile);
+	background: var(--fahar-color-background);
 }
 
 .fahar-portfolio-single__article {
 	display: grid;
-	gap: var(--fahar-space-7);
+	gap: var(--fahar-space-6);
 }
 
 .fahar-portfolio-single__back a {
@@ -55,19 +56,19 @@
 
 .fahar-portfolio-single__layout {
 	display: grid;
-	gap: var(--fahar-space-6);
+	gap: var(--fahar-space-5);
 }
 
 .fahar-portfolio-single__media {
 	overflow: hidden;
 	min-inline-size: 0;
 	border-radius: var(--fahar-radius-lg);
-	background: var(--fahar-color-surface-2);
+	background: var(--fahar-color-surface-active);
 }
 
 .fahar-portfolio-media {
 	position: relative;
-	background: var(--fahar-color-surface-2);
+	background: var(--fahar-color-surface-active);
 }
 
 .fahar-portfolio-slider__viewport {
@@ -75,7 +76,7 @@
 	overflow-x: auto;
 	overscroll-behavior-inline: contain;
 	scroll-snap-type: inline mandatory;
-	scrollbar-color: var(--fahar-color-border-strong) var(--fahar-color-surface-1);
+	scrollbar-color: var(--fahar-color-border-strong) transparent;
 	scrollbar-width: thin;
 }
 
@@ -99,7 +100,7 @@
 .fahar-portfolio-media__item {
 	min-inline-size: 0;
 	margin: 0;
-	background: var(--fahar-color-surface-2);
+	background: var(--fahar-color-surface-active);
 }
 
 .fahar-portfolio-media__image {
@@ -107,6 +108,7 @@
 	inline-size: 100%;
 	max-inline-size: none;
 	block-size: auto;
+	margin-inline: auto;
 }
 
 .fahar-portfolio-media__embed {
@@ -114,6 +116,68 @@
 	inline-size: 100%;
 	aspect-ratio: 16 / 9;
 	background: var(--fahar-color-background);
+}
+
+.fahar-portfolio-media__poster {
+	position: absolute;
+	z-index: 1;
+	inset: 0;
+	display: grid;
+	inline-size: 100%;
+	block-size: 100%;
+	padding: 0;
+	place-items: center;
+	border: 0;
+	background: var(--fahar-color-background);
+	color: var(--fahar-color-text-primary);
+	cursor: pointer;
+}
+
+.fahar-portfolio-media__poster[hidden] {
+	display: none;
+}
+
+.fahar-portfolio-media__poster-image {
+	position: absolute;
+	inset: 0;
+	display: block;
+	inline-size: 100%;
+	block-size: 100%;
+	object-fit: cover;
+}
+
+.fahar-portfolio-media__poster::after {
+	position: absolute;
+	inset: 0;
+	background: var(--fahar-color-media-overlay-soft);
+	content: '';
+}
+
+.fahar-portfolio-media__poster-play {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	inline-size: 3.5rem;
+	block-size: 3.5rem;
+	place-items: center;
+	border: 1px solid var(--fahar-color-media-overlay-border);
+	border-radius: var(--fahar-radius-round);
+	background: var(--fahar-color-media-overlay);
+	box-shadow: var(--fahar-shadow-medium);
+}
+
+.fahar-portfolio-media__poster-play svg {
+	inline-size: 1.5rem;
+	block-size: 1.5rem;
+}
+
+.fahar-portfolio-media__poster.is-load-delayed .fahar-portfolio-media__poster-play {
+	background: var(--fahar-color-surface-elevated);
+}
+
+.fahar-portfolio-media__poster:focus-visible {
+	outline: var(--fahar-focus-ring-width) solid var(--fahar-color-focus-ring);
+	outline-offset: calc(-1 * var(--fahar-focus-ring-width));
 }
 
 .fahar-portfolio-media__iframe {
@@ -131,19 +195,31 @@
 	background: var(--fahar-color-background);
 }
 
-.fahar-portfolio-media__placeholder {
-	min-block-size: clamp(18rem, 62vw, 42rem);
-	background: var(--fahar-color-surface-2);
+.fahar-portfolio-media__empty {
+	margin: 0;
+	padding: var(--fahar-space-5);
+	color: var(--fahar-color-text-muted);
+	font-size: var(--fahar-text-body-sm);
+	text-align: center;
 }
 
 .fahar-portfolio-slider__controls {
+	position: absolute;
+	z-index: 2;
+	inset-block-end: var(--fahar-space-3);
+	inset-inline: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	gap: var(--fahar-space-2);
-	padding: var(--fahar-space-2);
-	border-block-start: 1px solid var(--fahar-color-border-subtle);
-	background: var(--fahar-color-surface-1);
+	padding: var(--fahar-space-1);
+	inline-size: max-content;
+	margin-inline: auto;
+	border: 1px solid var(--fahar-color-border);
+	border-radius: var(--fahar-radius-pill);
+	background: var(--fahar-color-media-overlay);
+	box-shadow: var(--fahar-shadow-medium);
+	backdrop-filter: blur(10px);
 }
 
 .fahar-portfolio-slider__controls[hidden] {
@@ -157,10 +233,10 @@
 	inline-size: 2.75rem;
 	min-block-size: 2.75rem;
 	padding: 0;
-	border: 1px solid var(--fahar-color-border-strong);
+	border: 0;
 	border-radius: var(--fahar-radius-round);
-	background: var(--fahar-color-control);
-	color: var(--fahar-color-control-text);
+	background: transparent;
+	color: var(--fahar-color-text-secondary);
 	font: inherit;
 	font-size: var(--fahar-text-body-sm);
 	cursor: pointer;
@@ -198,8 +274,7 @@
 }
 
 .fahar-portfolio-slider__button:disabled {
-	border-color: var(--fahar-color-border);
-	background: var(--fahar-color-control-disabled);
+	background: transparent;
 	color: var(--fahar-color-control-disabled-text);
 	cursor: not-allowed;
 	opacity: 1;
@@ -207,7 +282,7 @@
 
 .fahar-portfolio-slider__counter {
 	min-inline-size: 3.5rem;
-	color: var(--fahar-color-text-muted);
+	color: var(--fahar-color-text-secondary);
 	font-size: var(--fahar-text-meta);
 	font-variant-numeric: tabular-nums;
 	text-align: center;
@@ -217,7 +292,7 @@
 	display: flex;
 	min-inline-size: 0;
 	flex-direction: column;
-	gap: var(--fahar-space-5);
+	gap: var(--fahar-space-6);
 }
 
 .fahar-portfolio-header {
@@ -346,7 +421,7 @@
 }
 
 .fahar-portfolio-description__content a {
-	color: var(--fahar-color-desert-gold);
+	color: var(--fahar-color-text-primary);
 	text-underline-offset: var(--fahar-space-1);
 }
 
@@ -406,7 +481,7 @@
 	border: 0;
 	border-radius: var(--fahar-radius-sm);
 	background: transparent;
-	color: var(--fahar-color-button);
+	color: var(--fahar-color-control-text);
 	font: inherit;
 	font-size: var(--fahar-text-body-sm);
 	font-weight: var(--fahar-weight-semibold);
@@ -415,16 +490,16 @@
 }
 
 .fahar-portfolio-description__toggle:active {
-	color: var(--fahar-color-button-active);
+	color: var(--fahar-color-control-active-text);
 }
 
 @media (hover: hover) {
 	.fahar-portfolio-description__toggle:hover {
-		color: var(--fahar-color-button-hover);
+		color: var(--fahar-color-control-hover-text);
 	}
 
 	.fahar-portfolio-description__content a:hover {
-		color: var(--fahar-color-desert-gold-hover);
+		color: var(--fahar-color-text-secondary);
 	}
 }
 
@@ -541,7 +616,7 @@
 .fahar-comment-list .comment-edit-link,
 .fahar-portfolio-comments .comment-reply-title small a,
 .fahar-portfolio-comments .logged-in-as a {
-	color: var(--fahar-color-desert-gold);
+	color: var(--fahar-color-text-secondary);
 	font-size: var(--fahar-text-body-sm);
 	font-weight: var(--fahar-weight-semibold);
 	text-decoration: none;
@@ -575,7 +650,7 @@
 
 .fahar-portfolio-comments .page-numbers.current {
 	background: var(--fahar-color-surface-2);
-	color: var(--fahar-color-desert-gold);
+	color: var(--fahar-color-text-primary);
 }
 
 .fahar-comment-respond {
@@ -649,7 +724,7 @@
 
 .fahar-comment-form input:not([type='checkbox']):not([type='submit']):not([type='hidden']):focus,
 .fahar-comment-form textarea:focus {
-	border-color: var(--fahar-color-desert-gold);
+	border-color: var(--fahar-color-border-strong);
 	background: var(--fahar-color-surface-2);
 }
 
@@ -671,7 +746,7 @@
 
 @media (hover: hover) {
 	.fahar-portfolio-comments a:hover {
-		color: var(--fahar-color-desert-gold-hover);
+		color: var(--fahar-color-text-primary);
 	}
 }
 
@@ -717,22 +792,18 @@
 
 @media (min-width: 64rem) {
 	.fahar-portfolio-single {
-		padding-block: var(--fahar-space-7);
+		padding-block: var(--fahar-space-5) var(--fahar-space-8);
 		padding-inline: var(--fahar-page-padding-inline);
 	}
 
 	.fahar-portfolio-single__layout {
-		grid-template-columns: minmax(0, 1.75fr) minmax(19rem, 1fr);
+		grid-template-columns: minmax(0, 2.2fr) minmax(18rem, 0.8fr);
 		align-items: start;
-		gap: var(--fahar-space-7);
+		gap: var(--fahar-space-6);
 	}
 
 	.fahar-portfolio-single__media {
 		border-radius: var(--fahar-radius-xl);
-	}
-
-	.fahar-portfolio-media__placeholder {
-		min-block-size: clamp(24rem, 45vw, 38rem);
 	}
 
 	.fahar-portfolio-comments {

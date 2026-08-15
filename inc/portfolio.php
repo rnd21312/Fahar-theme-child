@@ -447,7 +447,9 @@ function fahar_theme_normalize_http_url( $value ) {
 		return '';
 	}
 
-	$url   = esc_url_raw( trim( $value ), array( 'http', 'https' ) );
+	$value = trim( $value );
+	$value = 0 === strpos( $value, '//' ) ? 'https:' . $value : $value;
+	$url   = esc_url_raw( $value, array( 'http', 'https' ) );
 	$parts = $url ? wp_parse_url( $url ) : false;
 
 	if ( ! is_array( $parts ) || empty( $parts['scheme'] ) || empty( $parts['host'] ) ) {
@@ -455,6 +457,136 @@ function fahar_theme_normalize_http_url( $value ) {
 	}
 
 	return in_array( strtolower( $parts['scheme'] ), array( 'http', 'https' ), true ) ? $url : '';
+}
+
+/**
+ * Return the first safe media URL from common native/lazy attributes.
+ *
+ * @internal
+ * @param array<string, mixed> $attributes Attribute values keyed by name.
+ * @param bool                 $allow_srcset Whether to inspect srcset candidates.
+ * @return string
+ */
+function fahar_theme_get_portfolio_media_candidate_url( $attributes, $allow_srcset = false ) {
+	$attributes = is_array( $attributes ) ? $attributes : array();
+
+	foreach ( array( 'src', 'data-src', 'data-lazy-src', 'data-original', 'data-orig-file' ) as $attribute ) {
+		$url = isset( $attributes[ $attribute ] ) ? fahar_theme_normalize_http_url( $attributes[ $attribute ] ) : '';
+
+		if ( $url ) {
+			return $url;
+		}
+	}
+
+	if ( ! $allow_srcset ) {
+		return '';
+	}
+
+	foreach ( array( 'srcset', 'data-srcset' ) as $attribute ) {
+		if ( empty( $attributes[ $attribute ] ) || ! is_string( $attributes[ $attribute ] ) ) {
+			continue;
+		}
+
+		$valid_url = '';
+
+		foreach ( explode( ',', $attributes[ $attribute ] ) as $candidate ) {
+			$candidate_parts = preg_split( '/\s+/', trim( $candidate ) );
+			$candidate_url   = isset( $candidate_parts[0] ) ? fahar_theme_normalize_http_url( $candidate_parts[0] ) : '';
+
+			if ( $candidate_url ) {
+				$valid_url = $candidate_url;
+			}
+		}
+
+		if ( $valid_url ) {
+			return $valid_url;
+		}
+	}
+
+	return '';
+}
+
+/**
+ * Determine whether an image candidate is an inert loading surface.
+ *
+ * @internal
+ * @param string               $url           Normalized image URL.
+ * @param int                  $attachment_id Verified WordPress attachment ID.
+ * @param array<string, mixed> $attributes    Source image attributes.
+ * @return bool
+ */
+function fahar_theme_is_portfolio_placeholder_image( $url, $attachment_id = 0, $attributes = array() ) {
+	if ( fahar_theme_normalize_image_attachment_id( $attachment_id ) ) {
+		return false;
+	}
+
+	$url        = fahar_theme_normalize_http_url( $url );
+	$attributes = is_array( $attributes ) ? $attributes : array();
+	$width      = isset( $attributes['width'] ) ? absint( $attributes['width'] ) : 0;
+	$height     = isset( $attributes['height'] ) ? absint( $attributes['height'] ) : 0;
+	$path       = $url ? (string) wp_parse_url( $url, PHP_URL_PATH ) : '';
+	$file_name  = strtolower( basename( $path ) );
+
+	return ! $url
+		|| ( $width && $height && $width <= 1 && $height <= 1 )
+		|| 1 === preg_match( '/(?:^|[-_.])(blank|loading|placeholder|spacer|transparent)(?:[-_.]|$)/i', $file_name );
+}
+
+/**
+ * Return a real image URL while skipping inert lazy-loading surfaces.
+ *
+ * @internal
+ * @param array<string, mixed> $attributes    Image source attributes.
+ * @param int                  $attachment_id Verified WordPress attachment ID.
+ * @return string
+ */
+function fahar_theme_get_portfolio_image_candidate_url( $attributes, $attachment_id = 0 ) {
+	$attributes = is_array( $attributes ) ? $attributes : array();
+
+	foreach ( array( 'src', 'data-src', 'data-lazy-src', 'data-original', 'data-orig-file' ) as $attribute ) {
+		$url = isset( $attributes[ $attribute ] ) ? fahar_theme_normalize_http_url( $attributes[ $attribute ] ) : '';
+
+		if ( ! $url ) {
+			continue;
+		}
+
+		$placeholder_attributes = 'src' === $attribute ? $attributes : array();
+
+		if ( ! fahar_theme_is_portfolio_placeholder_image( $url, $attachment_id, $placeholder_attributes ) ) {
+			return $url;
+		}
+	}
+
+	$url = fahar_theme_get_portfolio_media_candidate_url(
+		array(
+			'srcset'      => isset( $attributes['srcset'] ) ? $attributes['srcset'] : '',
+			'data-srcset' => isset( $attributes['data-srcset'] ) ? $attributes['data-srcset'] : '',
+		),
+		true
+	);
+
+	return $url && ! fahar_theme_is_portfolio_placeholder_image( $url, $attachment_id ) ? $url : '';
+}
+
+/**
+ * Read supported media source attributes from a DOM element.
+ *
+ * @internal
+ * @param DOMElement $node DOM media node.
+ * @return array<string, string>
+ */
+function fahar_theme_get_portfolio_dom_media_attributes( $node ) {
+	$attributes = array();
+
+	if ( ! $node instanceof DOMElement ) {
+		return $attributes;
+	}
+
+	foreach ( array( 'src', 'data-src', 'data-lazy-src', 'data-original', 'data-orig-file', 'srcset', 'data-srcset', 'poster', 'data-poster', 'alt', 'width', 'height' ) as $attribute ) {
+		$attributes[ $attribute ] = $node->getAttribute( $attribute );
+	}
+
+	return $attributes;
 }
 
 /**
@@ -541,17 +673,28 @@ function fahar_theme_detect_portfolio_video_provider( $url ) {
  * @return string
  */
 function fahar_theme_get_portfolio_iframe_src( $embed ) {
-	$pattern = '/<iframe\b[^>]*\bsrc\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s>]+))/i';
-
-	if ( ! preg_match( $pattern, $embed, $matches ) ) {
+	if ( ! is_string( $embed ) || ! preg_match( '/<iframe\b(?<attributes>[^>]*)>/i', $embed, $iframe_match ) ) {
 		return '';
 	}
 
-	foreach ( array( 1, 2, 3 ) as $index ) {
-		if ( ! empty( $matches[ $index ] ) ) {
-			$src = html_entity_decode( $matches[ $index ], ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	$attributes = isset( $iframe_match['attributes'] ) ? $iframe_match['attributes'] : '';
 
-			return 0 === strpos( $src, '//' ) ? 'https:' . $src : $src;
+	foreach ( array( 'src', 'data-src', 'data-lazy-src' ) as $attribute ) {
+		$pattern = '/(?:^|\s)' . preg_quote( $attribute, '/' ) . '\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s>]+))/i';
+
+		if ( ! preg_match( $pattern, $attributes, $matches ) ) {
+			continue;
+		}
+
+		foreach ( array( 1, 2, 3 ) as $index ) {
+			if ( ! empty( $matches[ $index ] ) ) {
+				$src = html_entity_decode( $matches[ $index ], ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+				$src = 0 === strpos( $src, '//' ) ? 'https:' . $src : $src;
+
+				if ( fahar_theme_normalize_http_url( $src ) ) {
+					return $src;
+				}
+			}
 		}
 	}
 
@@ -685,9 +828,33 @@ function fahar_theme_prepare_portfolio_video_media_item( $url, $title ) {
 		}
 
 		if ( 1 === preg_match( '/^[A-Za-z0-9_-]{11}$/', (string) $video_id ) ) {
+			$safe_query = array();
+			$query      = array();
+			wp_parse_str( isset( $parts['query'] ) ? $parts['query'] : '', $query );
+
+			foreach ( array( 'start', 'end', 'index' ) as $key ) {
+				if ( isset( $query[ $key ] ) && is_scalar( $query[ $key ] ) && ctype_digit( (string) $query[ $key ] ) ) {
+					$safe_query[ $key ] = (string) absint( $query[ $key ] );
+				}
+			}
+
+			if ( isset( $query['list'] ) && is_scalar( $query['list'] ) && 1 === preg_match( '/^[A-Za-z0-9_-]{1,128}$/', (string) $query['list'] ) ) {
+				$safe_query['list'] = (string) $query['list'];
+			}
+
+			if ( isset( $query['playlist'] ) && is_scalar( $query['playlist'] ) && 1 === preg_match( '/^[A-Za-z0-9_-]{11}(?:,[A-Za-z0-9_-]{11})*$/', (string) $query['playlist'] ) ) {
+				$safe_query['playlist'] = (string) $query['playlist'];
+			}
+
+			$source = 'https://www.youtube-nocookie.com/embed/' . $video_id;
+
+			if ( $safe_query ) {
+				$source = add_query_arg( $safe_query, $source );
+			}
+
 			return array(
 				'type'     => 'iframe',
-				'source'   => 'https://www.youtube-nocookie.com/embed/' . $video_id,
+				'source'   => $source,
 				'provider' => 'youtube',
 				'title'    => sprintf(
 					/* translators: %s: portfolio title. */
@@ -712,9 +879,17 @@ function fahar_theme_prepare_portfolio_video_media_item( $url, $title ) {
 		}
 
 		if ( $video_id ) {
+			$query = array();
+			wp_parse_str( isset( $parts['query'] ) ? $parts['query'] : '', $query );
+			$source = 'https://player.vimeo.com/video/' . $video_id;
+
+			if ( isset( $query['h'] ) && is_scalar( $query['h'] ) && 1 === preg_match( '/^[A-Za-z0-9]{6,64}$/', (string) $query['h'] ) ) {
+				$source = add_query_arg( 'h', (string) $query['h'], $source );
+			}
+
 			return array(
 				'type'     => 'iframe',
-				'source'   => 'https://player.vimeo.com/video/' . $video_id,
+				'source'   => $source,
 				'provider' => 'vimeo',
 				'title'    => sprintf(
 					/* translators: %s: portfolio title. */
@@ -789,7 +964,7 @@ function fahar_theme_prepare_portfolio_content_image_item( $attachment_id, $url,
 		$attachment_id = fahar_theme_normalize_image_attachment_id( attachment_url_to_postid( $url ) );
 	}
 
-	if ( ! $attachment_id && ! $url ) {
+	if ( ( ! $attachment_id && ! $url ) || fahar_theme_is_portfolio_placeholder_image( $url, $attachment_id, $attributes ) ) {
 		return array();
 	}
 
@@ -954,6 +1129,11 @@ function fahar_theme_get_portfolio_html_media_items( $content, $post, $title ) {
 			} elseif ( 'img' === $tag ) {
 				$class_name    = (string) $processor->get_attribute( 'class' );
 				$attachment_id = absint( $processor->get_attribute( 'data-id' ) );
+				$attributes    = array();
+
+				foreach ( array( 'src', 'data-src', 'data-lazy-src', 'data-original', 'data-orig-file', 'srcset', 'data-srcset', 'alt', 'width', 'height' ) as $attribute ) {
+					$attributes[ $attribute ] = $processor->get_attribute( $attribute );
+				}
 
 				if ( ! $attachment_id && preg_match( '/(?:^|\s)wp-image-(\d+)(?:\s|$)/', $class_name, $matches ) ) {
 					$attachment_id = absint( $matches[1] );
@@ -961,20 +1141,26 @@ function fahar_theme_get_portfolio_html_media_items( $content, $post, $title ) {
 
 				$item = fahar_theme_prepare_portfolio_content_image_item(
 					$attachment_id,
-					$processor->get_attribute( 'src' ),
+					fahar_theme_get_portfolio_image_candidate_url( $attributes, $attachment_id ),
 					$title,
-					array(
-						'alt'    => $processor->get_attribute( 'alt' ),
-						'width'  => $processor->get_attribute( 'width' ),
-						'height' => $processor->get_attribute( 'height' ),
-					)
+					$attributes
 				);
 
 				if ( $item ) {
 					$items[] = $item;
 				}
 			} elseif ( in_array( $tag, array( 'video', 'source', 'iframe', 'embed', 'object' ), true ) ) {
-				$url  = 'object' === $tag ? $processor->get_attribute( 'data' ) : $processor->get_attribute( 'src' );
+				$source_attributes = array();
+
+				foreach ( array( 'src', 'data-src', 'data-lazy-src' ) as $attribute ) {
+					$source_attributes[ $attribute ] = $processor->get_attribute( $attribute );
+				}
+
+				if ( 'object' === $tag ) {
+					$source_attributes['src'] = $processor->get_attribute( 'data' );
+				}
+
+				$url  = fahar_theme_get_portfolio_media_candidate_url( $source_attributes );
 				$item = fahar_theme_prepare_portfolio_video_media_item( $url, $title );
 
 				if ( $item ) {
@@ -1071,6 +1257,7 @@ function fahar_theme_get_portfolio_html_media_items( $content, $post, $title ) {
 		if ( 'img' === $tag ) {
 			$attachment_id = absint( $node->getAttribute( 'data-id' ) );
 			$class_name    = $node->getAttribute( 'class' );
+			$attributes    = fahar_theme_get_portfolio_dom_media_attributes( $node );
 
 			if ( ! $attachment_id && preg_match( '/(?:^|\s)wp-image-(\d+)(?:\s|$)/', $class_name, $matches ) ) {
 				$attachment_id = absint( $matches[1] );
@@ -1078,13 +1265,9 @@ function fahar_theme_get_portfolio_html_media_items( $content, $post, $title ) {
 
 			$item = fahar_theme_prepare_portfolio_content_image_item(
 				$attachment_id,
-				$node->getAttribute( 'src' ),
+				fahar_theme_get_portfolio_image_candidate_url( $attributes, $attachment_id ),
 				$title,
-				array(
-					'alt'    => $node->getAttribute( 'alt' ),
-					'width'  => $node->getAttribute( 'width' ),
-					'height' => $node->getAttribute( 'height' ),
-				)
+				$attributes
 			);
 
 			if ( $item ) {
@@ -1095,10 +1278,10 @@ function fahar_theme_get_portfolio_html_media_items( $content, $post, $title ) {
 		}
 
 		if ( 'video' === $tag ) {
-			$urls = array( $node->getAttribute( 'src' ) );
+			$urls = array( fahar_theme_get_portfolio_media_candidate_url( fahar_theme_get_portfolio_dom_media_attributes( $node ) ) );
 
 			foreach ( $node->getElementsByTagName( 'source' ) as $source ) {
-				$urls[] = $source->getAttribute( 'src' );
+				$urls[] = fahar_theme_get_portfolio_media_candidate_url( fahar_theme_get_portfolio_dom_media_attributes( $source ) );
 			}
 
 			foreach ( $urls as $url ) {
@@ -1115,7 +1298,13 @@ function fahar_theme_get_portfolio_html_media_items( $content, $post, $title ) {
 		}
 
 		if ( in_array( $tag, array( 'iframe', 'embed', 'object' ), true ) ) {
-			$url  = 'object' === $tag ? $node->getAttribute( 'data' ) : $node->getAttribute( 'src' );
+			$attributes = fahar_theme_get_portfolio_dom_media_attributes( $node );
+
+			if ( 'object' === $tag ) {
+				$attributes['src'] = $node->getAttribute( 'data' );
+			}
+
+			$url  = fahar_theme_get_portfolio_media_candidate_url( $attributes );
 			$item = fahar_theme_prepare_portfolio_video_media_item( $url, $title );
 
 			if ( $item ) {
@@ -1179,6 +1368,7 @@ function fahar_theme_split_portfolio_rendered_content( $html, $post, $title ) {
 	libxml_use_internal_errors( $previous_state );
 
 	if ( ! $loaded ) {
+		$empty['description'] = trim( wp_kses_post( $html ) );
 		return $empty;
 	}
 
@@ -1186,6 +1376,7 @@ function fahar_theme_split_portfolio_rendered_content( $html, $post, $title ) {
 	$root  = $xpath->query( '//*[@id="fahar-content-split-root"]' )->item( 0 );
 
 	if ( ! $root instanceof DOMElement ) {
+		$empty['description'] = trim( wp_kses_post( $html ) );
 		return $empty;
 	}
 
@@ -1236,7 +1427,132 @@ function fahar_theme_split_portfolio_rendered_content( $html, $post, $title ) {
 			$parent = $next_parent;
 		}
 	};
-	$media_nodes    = iterator_to_array( $xpath->query( './/picture|.//img|.//video|.//iframe|.//embed|.//object', $root ) );
+	$node_order = new SplObjectStorage();
+
+	foreach ( iterator_to_array( $xpath->query( './/picture|.//img|.//video|.//iframe|.//embed|.//object', $root ) ) as $index => $ordered_node ) {
+		if ( $ordered_node instanceof DOMElement ) {
+			$node_order[ $ordered_node ] = absint( $index );
+		}
+	}
+
+	$video_nodes = iterator_to_array( $xpath->query( './/video|.//iframe|.//embed|.//object', $root ) );
+
+	foreach ( $video_nodes as $node ) {
+		if ( ! $node instanceof DOMElement || ! $node->parentNode ) {
+			continue;
+		}
+
+		$tag        = strtolower( $node->tagName );
+		$attributes = fahar_theme_get_portfolio_dom_media_attributes( $node );
+		$urls       = array();
+
+		if ( 'video' === $tag ) {
+			$urls[] = fahar_theme_get_portfolio_media_candidate_url( $attributes );
+
+			foreach ( $node->getElementsByTagName( 'source' ) as $source ) {
+				$urls[] = fahar_theme_get_portfolio_media_candidate_url( fahar_theme_get_portfolio_dom_media_attributes( $source ) );
+			}
+		} else {
+			if ( 'object' === $tag ) {
+				$attributes['src'] = $node->getAttribute( 'data' );
+			}
+
+			$urls[] = fahar_theme_get_portfolio_media_candidate_url( $attributes );
+		}
+
+		$item = array();
+		$url  = '';
+
+		foreach ( $urls as $candidate_url ) {
+			$item = fahar_theme_prepare_portfolio_video_media_item( $candidate_url, $title );
+
+			if ( $item ) {
+				$url = $candidate_url;
+				break;
+			}
+		}
+
+		if ( $item ) {
+			$item['_content_order'] = $node_order->contains( $node ) ? absint( $node_order[ $node ] ) : count( $items );
+			$attachment_id = $get_attachment( $node, $url );
+
+			if ( $attachment_id ) {
+				$item['attachment_id'] = $attachment_id;
+			}
+
+			$poster_node    = null;
+			$poster_wrapper = null;
+			$poster_id      = 0;
+			$poster_url     = fahar_theme_normalize_http_url(
+				! empty( $attributes['poster'] ) ? $attributes['poster'] : ( isset( $attributes['data-poster'] ) ? $attributes['data-poster'] : '' )
+			);
+
+			if ( ! $poster_url && 'video' !== $tag ) {
+				$ancestor = $node->parentNode;
+				$depth    = 0;
+
+				while ( $ancestor instanceof DOMElement && $ancestor !== $root && $depth < 4 ) {
+					$class_name  = strtolower( $ancestor->getAttribute( 'class' ) );
+					$tag_name    = strtolower( $ancestor->tagName );
+					$video_count = $xpath->query( './/video|.//iframe|.//embed|.//object', $ancestor )->length;
+					$images      = $xpath->query( './/img', $ancestor );
+					$has_prose   = $xpath->query( './/figcaption|.//p|.//h1|.//h2|.//h3|.//h4|.//h5|.//h6|.//ul|.//ol|.//blockquote', $ancestor )->length > 0;
+					$is_media_ui = 'figure' === $tag_name
+						|| 1 === preg_match( '/(?:^|[\s_-])(?:video|embed|player|media|lightbox)(?:[\s_-]|$)/', $class_name )
+						|| ( ! $has_prose && '' === trim( $ancestor->textContent ) );
+
+					if ( $is_media_ui && 1 === $video_count && $images->length > 0 ) {
+						$poster_node    = $images->item( 0 );
+						$poster_wrapper = $ancestor;
+						break;
+					}
+
+					$ancestor = $ancestor->parentNode;
+					++$depth;
+				}
+
+				if ( $poster_node instanceof DOMElement ) {
+					if ( $node_order->contains( $poster_node ) ) {
+						$item['_content_order'] = min( $item['_content_order'], absint( $node_order[ $poster_node ] ) );
+					}
+
+					$poster_attributes = fahar_theme_get_portfolio_dom_media_attributes( $poster_node );
+					$poster_id         = $get_attachment( $poster_node );
+					$poster_url        = fahar_theme_get_portfolio_image_candidate_url( $poster_attributes, $poster_id );
+				}
+			}
+
+			if ( $poster_url ) {
+				$poster_id = $poster_id ? fahar_theme_normalize_image_attachment_id( $poster_id ) : fahar_theme_normalize_image_attachment_id( attachment_url_to_postid( $poster_url ) );
+
+				if ( $poster_id ) {
+					$item['poster_attachment_id'] = $poster_id;
+				}
+
+				$item['poster_url'] = $poster_url;
+			}
+
+			$item['origin'] = 'content';
+			$items[]        = $item;
+
+			$remove_wrapper = $poster_wrapper instanceof DOMElement
+				&& 0 === $xpath->query( './/figcaption|.//p|.//h1|.//h2|.//h3|.//h4|.//h5|.//h6|.//ul|.//ol|.//blockquote', $poster_wrapper )->length;
+
+			if ( $remove_wrapper ) {
+				$remove_node( $poster_wrapper );
+			} else {
+				if ( $poster_node instanceof DOMElement && $poster_node->parentNode ) {
+					$remove_node( $poster_node );
+				}
+
+				$remove_node( $node );
+			}
+		} elseif ( in_array( $tag, array( 'iframe', 'embed', 'object' ), true ) ) {
+			$remove_node( $node );
+		}
+	}
+
+	$media_nodes = iterator_to_array( $xpath->query( './/picture|.//img', $root ) );
 
 	foreach ( $media_nodes as $node ) {
 		if ( ! $node instanceof DOMElement || ! $node->parentNode ) {
@@ -1245,70 +1561,25 @@ function fahar_theme_split_portfolio_rendered_content( $html, $post, $title ) {
 
 		$tag        = strtolower( $node->tagName );
 		$parent_tag = $node->parentNode instanceof DOMElement ? strtolower( $node->parentNode->tagName ) : '';
-		$item       = array();
+		$image      = 'picture' === $tag ? $xpath->query( './/img', $node )->item( 0 ) : $node;
 
-		if ( 'picture' === $tag ) {
-			$image = $xpath->query( './/img', $node )->item( 0 );
-
-			if ( $image instanceof DOMElement ) {
-				$url  = $image->getAttribute( 'src' );
-				$item = fahar_theme_prepare_portfolio_content_image_item(
-					$get_attachment( $image, $url ),
-					$url,
-					$title,
-					array(
-						'alt'    => $image->getAttribute( 'alt' ),
-						'width'  => $image->getAttribute( 'width' ),
-						'height' => $image->getAttribute( 'height' ),
-					)
-				);
-			}
-		} elseif ( 'img' === $tag && 'picture' !== $parent_tag ) {
-			$url  = $node->getAttribute( 'src' );
-			$item = fahar_theme_prepare_portfolio_content_image_item(
-				$get_attachment( $node, $url ),
-				$url,
-				$title,
-				array(
-					'alt'    => $node->getAttribute( 'alt' ),
-					'width'  => $node->getAttribute( 'width' ),
-					'height' => $node->getAttribute( 'height' ),
-				)
-			);
-		} elseif ( 'video' === $tag ) {
-			$urls = array( $node->getAttribute( 'src' ) );
-
-			foreach ( $node->getElementsByTagName( 'source' ) as $source ) {
-				$urls[] = $source->getAttribute( 'src' );
-			}
-
-			foreach ( $urls as $url ) {
-				$item = fahar_theme_prepare_portfolio_video_media_item( $url, $title );
-
-				if ( $item ) {
-					$attachment_id = $get_attachment( $node, $url );
-
-					if ( $attachment_id ) {
-						$item['attachment_id'] = $attachment_id;
-					}
-
-					break;
-				}
-			}
-		} elseif ( in_array( $tag, array( 'iframe', 'embed', 'object' ), true ) ) {
-			$url  = 'object' === $tag ? $node->getAttribute( 'data' ) : $node->getAttribute( 'src' );
-			$item = fahar_theme_prepare_portfolio_video_media_item( $url, $title );
+		if ( ! $image instanceof DOMElement || ( 'img' === $tag && 'picture' === $parent_tag ) ) {
+			continue;
 		}
+
+		$attributes    = fahar_theme_get_portfolio_dom_media_attributes( $image );
+		$attachment_id = $get_attachment( $image );
+		$url           = fahar_theme_get_portfolio_image_candidate_url( $attributes, $attachment_id );
+		$item          = fahar_theme_prepare_portfolio_content_image_item( $attachment_id, $url, $title, $attributes );
 
 		if ( $item ) {
-			$item['origin'] = 'content';
-			$items[]        = $item;
+			$item['_content_order'] = $node_order->contains( $node ) ? absint( $node_order[ $node ] ) : count( $items );
+			$items[] = $item;
+			$remove_node( $node );
 		}
-
-		$remove_node( $node );
 	}
 
-	foreach ( iterator_to_array( $xpath->query( './/script|.//style|.//audio|.//source|.//track|.//param', $root ) ) as $node ) {
+	foreach ( iterator_to_array( $xpath->query( './/script|.//style|.//param', $root ) ) as $node ) {
 		$remove_node( $node );
 	}
 
@@ -1331,6 +1602,19 @@ function fahar_theme_split_portfolio_rendered_content( $html, $post, $title ) {
 		}
 	}
 
+	usort(
+		$items,
+		static function ( $first, $second ) {
+			return ( isset( $first['_content_order'] ) ? absint( $first['_content_order'] ) : 0 )
+				<=> ( isset( $second['_content_order'] ) ? absint( $second['_content_order'] ) : 0 );
+		}
+	);
+
+	foreach ( $items as &$ordered_item ) {
+		unset( $ordered_item['_content_order'] );
+	}
+	unset( $ordered_item );
+
 	$description = '';
 
 	foreach ( iterator_to_array( $root->childNodes ) as $child ) {
@@ -1339,7 +1623,7 @@ function fahar_theme_split_portfolio_rendered_content( $html, $post, $title ) {
 
 	$allowed_html = wp_kses_allowed_html( 'post' );
 
-	foreach ( array( 'picture', 'img', 'video', 'audio', 'source', 'track', 'iframe', 'embed', 'object', 'param' ) as $media_tag ) {
+	foreach ( array( 'iframe', 'embed', 'object', 'param' ) as $media_tag ) {
 		unset( $allowed_html[ $media_tag ] );
 	}
 
@@ -1487,7 +1771,7 @@ function fahar_theme_strip_portfolio_description_media( $html ) {
 
 	$allowed_html = wp_kses_allowed_html( 'post' );
 
-	foreach ( array( 'picture', 'img', 'video', 'audio', 'source', 'track', 'iframe', 'embed', 'object', 'param' ) as $media_tag ) {
+	foreach ( array( 'iframe', 'embed', 'object', 'param' ) as $media_tag ) {
 		unset( $allowed_html[ $media_tag ] );
 	}
 
@@ -1629,6 +1913,29 @@ function fahar_theme_get_portfolio_media_items( $post = null ) {
 
 		$seen_canonical_urls[ $source ] = true;
 		$item['source']                  = $source;
+		$poster_attachment_id           = isset( $item['poster_attachment_id'] ) ? fahar_theme_normalize_image_attachment_id( $item['poster_attachment_id'] ) : 0;
+		$poster_url                     = isset( $item['poster_url'] ) ? fahar_theme_normalize_http_url( $item['poster_url'] ) : '';
+
+		if ( ! $poster_attachment_id && $poster_url ) {
+			$poster_attachment_id = fahar_theme_normalize_image_attachment_id( attachment_url_to_postid( $poster_url ) );
+		}
+
+		if ( $poster_attachment_id ) {
+			$poster_original_url                            = fahar_theme_normalize_http_url( wp_get_attachment_url( $poster_attachment_id ) );
+			$seen_attachment_ids[ $poster_attachment_id ]   = true;
+			$item['poster_attachment_id']                   = $poster_attachment_id;
+			$item['poster_url']                             = $poster_url ? $poster_url : $poster_original_url;
+
+			if ( $poster_original_url ) {
+				$seen_canonical_urls[ $poster_original_url ] = true;
+			}
+		} elseif ( $poster_url && ! fahar_theme_is_portfolio_placeholder_image( $poster_url ) ) {
+			$item['poster_url']                  = $poster_url;
+			$seen_canonical_urls[ $poster_url ] = true;
+		} else {
+			unset( $item['poster_attachment_id'], $item['poster_url'] );
+		}
+
 		$item['primary']                 = ! $items;
 		$items[]                         = $item;
 	};

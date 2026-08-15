@@ -123,6 +123,33 @@
 		});
 	};
 
+	const initializeVideoPoster = (poster) => {
+		const embed = poster.closest('.fahar-portfolio-media__embed');
+		const iframe = embed ? embed.querySelector('.fahar-portfolio-media__iframe') : null;
+
+		if (!iframe) {
+			return;
+		}
+
+		let fallbackTimer = 0;
+		const dismissPoster = () => {
+			window.clearTimeout(fallbackTimer);
+			poster.hidden = true;
+			poster.setAttribute('aria-hidden', 'true');
+		};
+
+		iframe.addEventListener('load', dismissPoster, { once: true });
+		poster.addEventListener('click', () => {
+			dismissPoster();
+			iframe.focus({ preventScroll: true });
+		});
+		poster.hidden = false;
+
+		fallbackTimer = window.setTimeout(() => {
+			poster.classList.add('is-load-delayed');
+		}, 8000);
+	};
+
 	const initializeSlider = (slider) => {
 		const viewport = slider.querySelector('.fahar-portfolio-slider__viewport');
 		const slides = Array.from(slider.querySelectorAll('.fahar-portfolio-slider__slide'));
@@ -424,6 +451,7 @@
 	};
 
 	const initialize = () => {
+		document.querySelectorAll('[data-fahar-video-poster]').forEach(initializeVideoPoster);
 		document.querySelectorAll('[data-fahar-slider]').forEach(initializeSlider);
 		document.querySelectorAll('[data-fahar-description]').forEach(initializeDescription);
 		document.querySelectorAll('[data-fahar-back-to-explore]').forEach(initializeBackLink);

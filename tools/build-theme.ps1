@@ -1,13 +1,15 @@
 [CmdletBinding()]
 param(
     [switch] $Clean,
-    [string] $OutputDirectory = 'build'
+    [string] $OutputDirectory = 'build',
+    [string] $ThemeDirectoryName = 'fahar-theme-child'
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$themeSlug = 'fahar-theme-child'
+$artifactSlug = 'fahar-theme-child'
+$packageDirectoryName = $ThemeDirectoryName.Trim()
 $repoRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..')).TrimEnd([char[]] @('\', '/'))
 $stylePath = Join-Path $repoRoot 'style.css'
 $temporaryArchivePath = $null
@@ -79,13 +81,13 @@ function Test-ThemeArchive {
         $entryNames = @($archive.Entries | ForEach-Object { $_.FullName })
         if ($entryNames.Count -eq 0) { throw 'Archive contains no files.' }
 
-        foreach ($requiredEntry in @("$themeSlug/style.css", "$themeSlug/functions.php")) {
+        foreach ($requiredEntry in @("$packageDirectoryName/style.css", "$packageDirectoryName/functions.php")) {
             if ($entryNames -cnotcontains $requiredEntry) {
                 throw "Archive is missing required file: $requiredEntry"
             }
         }
 
-        $rootPrefix = "$themeSlug/"
+        $rootPrefix = "$packageDirectoryName/"
         foreach ($entryName in $entryNames) {
             if (($entryName -notlike "$rootPrefix*") -or $entryName.Contains('\') -or
                 $entryName.StartsWith('/') -or $entryName.Contains(':')) {
@@ -109,6 +111,16 @@ function Test-ThemeArchive {
 
 try {
     Add-Type -AssemblyName System.IO.Compression -ErrorAction Stop
+    if ([string]::IsNullOrWhiteSpace($packageDirectoryName) -or
+        $packageDirectoryName -in @('.', '..') -or
+        $packageDirectoryName.Contains('..') -or
+        $packageDirectoryName.IndexOfAny([IO.Path]::GetInvalidFileNameChars()) -ge 0 -or
+        $packageDirectoryName.Contains('/') -or
+        $packageDirectoryName.Contains('\') -or
+        [IO.Path]::IsPathRooted($packageDirectoryName)) {
+        throw "ThemeDirectoryName must be one safe directory segment: '$ThemeDirectoryName'"
+    }
+
     if (-not [IO.File]::Exists($stylePath)) { throw "Theme stylesheet not found: $stylePath" }
 
     $styleContent = [IO.File]::ReadAllText($stylePath)
@@ -143,8 +155,8 @@ try {
         Get-ChildItem -LiteralPath $outputPath -Force | Remove-Item -Recurse -Force
     }
     [IO.Directory]::CreateDirectory($outputPath) | Out-Null
-    $finalArchivePath = Join-Path $outputPath "$themeSlug-$version.zip"
-    $temporaryArchivePath = Join-Path $outputPath ('.{0}-{1}-{2}.tmp' -f $themeSlug, $version, [guid]::NewGuid().ToString('N'))
+    $finalArchivePath = Join-Path $outputPath "$artifactSlug-$version.zip"
+    $temporaryArchivePath = Join-Path $outputPath ('.{0}-{1}-{2}.tmp' -f $artifactSlug, $version, [guid]::NewGuid().ToString('N'))
 
     $sourceFiles = @(
         [IO.Directory]::EnumerateFiles($repoRoot, '*', [IO.SearchOption]::AllDirectories) |
@@ -170,7 +182,7 @@ try {
         foreach ($sourcePath in $sourceFiles) {
             $relativePath = $sourcePath.Substring($repoRoot.Length).TrimStart([char[]] @('\', '/')).Replace('\', '/')
             $entry = $zipArchive.CreateEntry(
-                "$themeSlug/$relativePath", [IO.Compression.CompressionLevel]::Optimal
+                "$packageDirectoryName/$relativePath", [IO.Compression.CompressionLevel]::Optimal
             )
             $lastWriteTime = [DateTimeOffset] [IO.File]::GetLastWriteTimeUtc($sourcePath)
             $minimumZipTime = [DateTimeOffset]::Parse('1980-01-01T00:00:00Z')
@@ -208,10 +220,11 @@ try {
     if (Test-PathWithinDirectory -Path $finalArchivePath -Directory $repoRoot) {
         $displayPath = $finalArchivePath.Substring($repoRoot.Length).TrimStart([char[]] @('\', '/'))
     }
-    Write-Output "Theme:   $themeSlug"
-    Write-Output "Version: $version"
-    Write-Output "Files:   $fileCount"
-    Write-Output "Built:   $displayPath ($archiveSize bytes)"
+    Write-Output "Artifact:     $artifactSlug"
+    Write-Output "Version:      $version"
+    Write-Output "Package root: $packageDirectoryName/"
+    Write-Output "Files:        $fileCount"
+    Write-Output "Built:        $displayPath ($archiveSize bytes)"
 }
 catch {
     if (($null -ne $temporaryArchivePath) -and [IO.File]::Exists($temporaryArchivePath)) {

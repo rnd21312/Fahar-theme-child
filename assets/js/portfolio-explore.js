@@ -852,7 +852,7 @@
 		};
 
 		const closePanel = (restoreFocus = true) => {
-			if (!disclosure.open) {
+			if (!mobileQuery.matches || !disclosure.open) {
 				return;
 			}
 
@@ -865,7 +865,7 @@
 		};
 
 		const openPanel = () => {
-			if (disclosure.open) {
+			if (!mobileQuery.matches || disclosure.open) {
 				return;
 			}
 
@@ -877,6 +877,10 @@
 		};
 
 		trigger.addEventListener('click', () => {
+			if (!mobileQuery.matches) {
+				return;
+			}
+
 			if (disclosure.open) {
 				closePanel();
 			} else {
@@ -893,13 +897,13 @@
 		disclosure.addEventListener('toggle', syncOpenState);
 
 		document.addEventListener('pointerdown', (event) => {
-			if (disclosure.open && event.target instanceof Node && !root.contains(event.target)) {
+			if (mobileQuery.matches && disclosure.open && event.target instanceof Node && !root.contains(event.target)) {
 				closePanel(false);
 			}
 		});
 
 		root.addEventListener('keydown', (event) => {
-			if ('Escape' === event.key && disclosure.open) {
+			if (mobileQuery.matches && 'Escape' === event.key && disclosure.open) {
 				event.preventDefault();
 				closePanel();
 			}
@@ -932,15 +936,18 @@
 
 		const configureViewport = () => {
 			const restoreTriggerFocus = disclosure.open && panel.contains(document.activeElement);
-			disclosure.open = false;
-			trigger.hidden = false;
-			closeButton.hidden = false;
 
 			if (mobileQuery.matches) {
+				disclosure.open = false;
+				trigger.hidden = false;
+				closeButton.hidden = false;
 				panel.setAttribute('role', 'dialog');
 				panel.setAttribute('aria-modal', 'true');
 				panel.setAttribute('tabindex', '-1');
 			} else {
+				disclosure.open = true;
+				trigger.hidden = true;
+				closeButton.hidden = true;
 				panel.removeAttribute('role');
 				panel.removeAttribute('aria-modal');
 				panel.removeAttribute('tabindex');
@@ -948,7 +955,7 @@
 
 			syncOpenState();
 
-			if (restoreTriggerFocus) {
+			if (restoreTriggerFocus && mobileQuery.matches) {
 				trigger.focus({ preventScroll: true });
 			}
 		};
