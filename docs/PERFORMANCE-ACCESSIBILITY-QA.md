@@ -3,9 +3,9 @@
 ## Areas reviewed
 
 - Conditional asset loading, script delivery, and duplicate enqueue risk
-- Explore Masonry observers, image loading, and Back-to-Explore restoration
-- Single Portfolio images, embeds, native video, slider, and description enhancement
-- Landmarks, headings, forms, cards, comments, navigation, focus, and touch targets
+- Explore Masonry observers and image loading
+- Portfolio card destinations and progressive loading
+- Landmarks, headings, forms, cards, navigation, focus, and touch targets
 - Reduced motion, no-JavaScript behavior, RTL logical properties, mobile clearance, and Elementor regressions
 
 ## Fixes made
@@ -13,17 +13,13 @@
 - Restored a keyboard-visible skip link and aligned both Fahar-owned main landmarks with its `#content` target.
 - Removed the unused global `app.js` request; feature scripts remain conditionally loaded and deferred.
 - Stopped forcing every card image to lazy-load so WordPress can apply its native loading and fetch-priority heuristics while retaining responsive image dimensions and sources.
-- Exposed slider position updates as a polite status so assistive technology can understand the current item.
 
 ## Verified behavior
 
-- Explore and Single Portfolio CSS/JS remain limited to their respective views; shared card CSS loads only on those views.
+- Explore CSS/JS and shared card CSS load only on the Explore view; Fahar owns no Portfolio Single assets.
 - Masonry batches layout work with `requestAnimationFrame`, scopes observers to its grid/cards, and retains CSS Grid without JavaScript.
-- Back restoration has no permanent scroll listener or polling and performs at most its initial restoration plus one load correction.
-- Primary Single image remains eager with high fetch priority, while approved embeds remain lazy. Native video uses controls and metadata preload without autoplay.
-- Media wrappers reserve responsive space for embeds, and WordPress attachment images retain intrinsic dimensions and responsive `srcset` output.
 - Native controls, labels, headings, focus rings, touch-target sizing, reduced-motion rules, and RTL logical properties remain intact.
-- Search/filter GET forms, cards, media scrolling, full description, Back link, comments, and navigation retain no-JavaScript behavior.
+- Search/filter GET forms, cards, destinations, and navigation retain no-JavaScript behavior.
 
 ## Runtime tests & automated tools
 

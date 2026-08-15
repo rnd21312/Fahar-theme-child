@@ -10,13 +10,13 @@ Current task: production-oriented child-theme foundation.
 
 ## Phase 3 — `/portfolios/` Pinterest-inspired Explore
 
-## Phase 4 — Single Portfolio Pinterest-inspired detail experience
+## Phase 4 — Single Portfolio ownership returned to WordPress/Elementor
 
 ## Phase 5 — Search, filtering, Load More, and state restoration
 
-## Phase 6 — WordPress comments and likes architecture
+## Phase 6 — Likes architecture for the companion plugin/Elementor layer
 
-## Phase 7 — Related portfolio ranking
+## Phase 7 — Explore discovery ranking
 
 ## Phase 8 — Fahar Elementor Core custom widgets
 

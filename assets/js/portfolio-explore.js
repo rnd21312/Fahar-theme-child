@@ -1,218 +1,19 @@
-/** Progressive masonry, filtering, loading, and return-state behavior for Fahar Explore. */
+/** Progressive masonry, filtering, and loading behavior for Fahar Explore. */
 (() => {
 	'use strict';
 
 	const gridSelector = '[data-fahar-masonry]';
 	const cardSelector = '.fahar-portfolio-card';
 	const exploreSelector = '[data-fahar-explore]';
-	const detailLinkSelector = '[data-fahar-portfolio-detail]';
 	const filterRootSelector = '[data-fahar-filter-root]';
 	const searchRootSelector = '[data-fahar-search-suggest]';
 	const infiniteFeedSelector = '[data-fahar-infinite-feed]';
 	const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])';
-	const storageKey = 'faharExploreReturnState:v1';
-	const stateMaxAge = 30 * 60 * 1000;
 	const initializedGrids = new WeakSet();
 	const resizeObservers = new WeakMap();
 	const masonryControllers = new WeakMap();
 
 	const getCards = (grid) => Array.from(grid.children).filter((child) => child.matches(cardSelector));
-
-	const removeStoredState = () => {
-		try {
-			window.sessionStorage.removeItem(storageKey);
-		} catch (error) {
-			// Storage can be unavailable without affecting normal navigation.
-		}
-	};
-
-	const readStoredState = () => {
-		try {
-			const stored = window.sessionStorage.getItem(storageKey);
-			return stored ? JSON.parse(stored) : null;
-		} catch (error) {
-			removeStoredState();
-			return null;
-		}
-	};
-
-	const writeStoredState = (state) => {
-		try {
-			window.sessionStorage.setItem(storageKey, JSON.stringify(state));
-			return true;
-		} catch (error) {
-			return false;
-		}
-	};
-
-	const parseStoredState = (state) => {
-		if (
-			!state
-			|| typeof state !== 'object'
-			|| typeof state.returnUrl !== 'string'
-			|| !state.returnUrl.startsWith('/')
-			|| state.returnUrl.startsWith('//')
-			|| !Number.isFinite(state.scrollY)
-			|| state.scrollY < 0
-			|| !Number.isInteger(state.portfolioId)
-			|| state.portfolioId < 1
-			|| !Number.isFinite(state.cardViewportOffset)
-			|| !Number.isFinite(state.timestamp)
-			|| typeof state.restoreRequested !== 'boolean'
-			|| (undefined !== state.loadedPage && (!Number.isInteger(state.loadedPage) || state.loadedPage < 1))
-			|| state.timestamp > Date.now()
-			|| Date.now() - state.timestamp > stateMaxAge
-		) {
-			return null;
-		}
-
-		try {
-			const returnUrl = new URL(state.returnUrl, window.location.origin);
-			if (returnUrl.origin !== window.location.origin) {
-				return null;
-			}
-
-			state.loadedPage = Number.isInteger(state.loadedPage) ? state.loadedPage : 1;
-			return { state, returnUrl };
-		} catch (error) {
-			return null;
-		}
-	};
-
-	const captureDeparture = (explore, event) => {
-		if (
-			event.defaultPrevented
-			|| event.button !== 0
-			|| event.metaKey
-			|| event.ctrlKey
-			|| event.shiftKey
-			|| event.altKey
-			|| !(event.target instanceof Element)
-		) {
-			return;
-		}
-
-		const link = event.target.closest(detailLinkSelector);
-
-		if (!link || !explore.contains(link)) {
-			return;
-		}
-
-		const card = link.closest('[data-fahar-portfolio-id]');
-		const rawPortfolioId = card ? card.dataset.faharPortfolioId : '';
-
-		if (!card || !/^[1-9]\d*$/.test(rawPortfolioId)) {
-			return;
-		}
-
-		let destination;
-
-		try {
-			destination = new URL(link.href, window.location.href);
-		} catch (error) {
-			return;
-		}
-
-		if (destination.origin !== window.location.origin) {
-			return;
-		}
-
-		writeStoredState({
-			returnUrl: `${window.location.pathname}${window.location.search}${window.location.hash}`,
-			scrollY: Math.max(0, window.scrollY),
-			portfolioId: Number.parseInt(rawPortfolioId, 10),
-			cardViewportOffset: card.getBoundingClientRect().top,
-			timestamp: Date.now(),
-			restoreRequested: false,
-			loadedPage: Number.parseInt(card.dataset.faharPortfolioPage || '1', 10),
-		});
-	};
-
-	const restoreExplorePosition = async (explore, infiniteFeed) => {
-		const parsed = parseStoredState(readStoredState());
-
-		if (!parsed) {
-			removeStoredState();
-			return;
-		}
-
-		const { state, returnUrl } = parsed;
-
-		if (!state.restoreRequested) {
-			return;
-		}
-
-		if (returnUrl.pathname !== window.location.pathname || returnUrl.search !== window.location.search) {
-			removeStoredState();
-			return;
-		}
-
-		state.restoreRequested = false;
-
-		if (!writeStoredState(state)) {
-			removeStoredState();
-		}
-
-		let cancelled = false;
-		let finished = false;
-		const cancelEvents = ['wheel', 'touchstart', 'pointerdown', 'keydown'];
-		const cancelRestoration = () => {
-			cancelled = true;
-			cancelEvents.forEach((eventName) => window.removeEventListener(eventName, cancelRestoration));
-		};
-		const finishRestoration = () => {
-			finished = true;
-			cancelEvents.forEach((eventName) => window.removeEventListener(eventName, cancelRestoration));
-		};
-
-		cancelEvents.forEach((eventName) => window.addEventListener(eventName, cancelRestoration, { passive: true }));
-
-		const restore = (isFinalAttempt) => {
-			if (cancelled || finished) {
-				return;
-			}
-
-			const card = explore.querySelector(`[data-fahar-portfolio-id="${state.portfolioId}"]`);
-			const documentHeight = Math.max(
-				document.documentElement.scrollHeight,
-				document.body ? document.body.scrollHeight : 0,
-			);
-			const maxScroll = Math.max(0, documentHeight - window.innerHeight);
-			const desiredScroll = card
-				? window.scrollY + card.getBoundingClientRect().top - state.cardViewportOffset
-				: state.scrollY;
-			const clampedScroll = Math.max(0, Math.min(desiredScroll, maxScroll));
-
-			if (Number.isFinite(clampedScroll)) {
-				window.scrollTo({ top: clampedScroll, behavior: 'auto' });
-			}
-
-			if (isFinalAttempt) {
-				finishRestoration();
-			}
-		};
-
-		const scheduleRestore = (isFinalAttempt) => {
-			window.requestAnimationFrame(() => {
-				window.requestAnimationFrame(() => restore(isFinalAttempt));
-			});
-		};
-
-		if (infiniteFeed && state.loadedPage > infiniteFeed.getCurrentPage()) {
-			await infiniteFeed.loadThroughPage(state.loadedPage, () => !cancelled);
-		}
-
-		if (cancelled) {
-			return;
-		}
-
-		if (document.readyState === 'complete') {
-			scheduleRestore(true);
-		} else {
-			scheduleRestore(false);
-			window.addEventListener('load', () => scheduleRestore(true), { once: true });
-		}
-	};
 
 	const initializeGrid = (grid) => {
 		if (initializedGrids.has(grid)) {
@@ -977,9 +778,7 @@
 		const explore = document.querySelector(exploreSelector);
 
 		if (explore) {
-			const infiniteFeed = initializeInfiniteFeed(explore);
-			explore.addEventListener('click', (event) => captureDeparture(explore, event));
-			restoreExplorePosition(explore, infiniteFeed);
+			initializeInfiniteFeed(explore);
 		}
 	};
 

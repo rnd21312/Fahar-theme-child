@@ -19,8 +19,7 @@ behavior remains isolated inside the adapter.
   `astra-portfolio-video-url`
 - Taxonomies: `astra-portfolio-categories`,
   `astra-portfolio-other-categories`, `astra-portfolio-tags`
-- Description: unformatted `post_content` for `single-page` items
-- Single permalink: supported only by normalized `single-page` items
+- Single permalink: normalized `single-page` items use their normal WordPress permalink
 
 Provider identifiers and meta keys are centralized and filterable in
 `inc/portfolio.php`; templates should use the public helpers below.
@@ -40,12 +39,8 @@ Provider identifiers and meta keys are centralized and filterable in
 - `fahar_theme_get_portfolio_external_url( $post = null ): string`
 - `fahar_theme_get_portfolio_video_source( $post = null ): array`
 - `fahar_theme_get_portfolio_destination( $post = null ): array`
-- `fahar_theme_get_portfolio_description( $post = null ): string`
-- `fahar_theme_get_portfolio_description_content( $post = null ): string`
 - `fahar_theme_get_portfolio_taxonomies(): string[]`
 - `fahar_theme_get_portfolio_terms( $post = null, $taxonomy = null ): WP_Term[]`
-- `fahar_theme_get_related_portfolios( $post = null, $limit = 6 ): WP_Post[]`
-- `fahar_theme_portfolio_has_single_permalink( $post = null ): bool`
 
 Existing Explore page helpers remain available for routing/navigation
 compatibility. `fahar_theme_is_portfolio_item()` remains a compatibility wrapper
@@ -55,23 +50,16 @@ When the plugin/post type is unavailable, post-backed helpers return `false`,
 `0`, `''`, `[]`, or the video `none` structure. The adapter never calls plugin
 classes or includes plugin files, so plugin absence cannot cause a hard failure.
 
-## Cover and gallery rules
+## Cover and image destination rules
 
 The cover ID prefers the verified `astra-portfolio-image-id` attachment meta,
 then falls back locally to the normal WordPress featured image ID. Both values
 must resolve to local attachments. The adapter performs no remote lookup and
 does not mutate portfolio data.
 
-Image portfolio media is read from `astra-lightbox-image-id`. The Single
-Portfolio renderer adds that attachment after the cover and deduplicates equal
-IDs. A distinct lightbox attachment renders at its full registered image size
-with WordPress responsive image markup.
-
-The plugin audit found no Astra-specific gallery meta contract. The universal
-Single Portfolio collection therefore extracts Gutenberg and Classic Editor
-images, galleries, supported video/embed content, and media attachments without
-inventing an Astra field. Extracted media is suppressed from the rendered
-description and appears only in the authoritative media slider.
+Image portfolio destinations use the verified `astra-lightbox-image-id`, then
+fall back to the cover URL. Fahar does not parse portfolio post content or build
+a separate Single media collection.
 
 ## Video source contract
 
@@ -94,9 +82,7 @@ array(
   iframe `src` when present.
 - Non-empty legacy values that are neither valid URLs nor recognizable media
   embed HTML become `unknown` and are preserved.
-- Empty values return `type: none`, `provider: none`, and an empty value. A
-  verified video value can participate in the universal media collection even
-  when another normalized portfolio type supplies the primary presentation.
+- Empty values return `type: none`, `provider: none`, and an empty value.
 
 Attachment video IDs are not normalized as `attachment`: the audit explicitly
 did not verify attachment IDs as a storage shape for
@@ -123,32 +109,18 @@ When the required source is absent or invalid, the destination is the stable
 `none` structure with an empty URL. The adapter never invents a permalink for
 provider-excluded Image/Video items and never fabricates a media URL.
 
-## Deferred verification and rendering
+## Single Portfolio ownership
+
+Fahar does not register a `template_include` override, Single template, content
+transform, media slider, or Single-specific assets. A normalized `single-page`
+card links to `get_permalink()`, after which WordPress, Hello Elementor, and
+Elementor resolve and render the request normally.
+
+## Deferred verification
 
 Task 06B still needs to verify actual type/meta population, legacy video shapes,
 cover completeness, runtime-added types, taxonomy usage, and third-party filter
 changes on the real site.
-
-## Media rendering contract
-
-`fahar_theme_get_portfolio_media_items()` is the authoritative Single Portfolio
-collection. Its order is WordPress Featured Image, content-authored media in
-authoring order, verified Astra cover/lightbox/video media, then remaining
-WordPress attachments. Without a Featured Image, the best verified Astra cover
-leads. Attachment IDs and canonical URLs are deduplicated.
-
-The request-scoped content transformation parses stored `post_content` without
-modifying it. It exposes the extracted collection to the slider and renders only
-remaining non-media rich content through the normal WordPress content pipeline
-and a safe post-HTML allowlist.
-
-The renderer supports responsive WordPress attachment images, sanitized HTTP(S)
-content images, WordPress video attachments, YouTube, Vimeo, Aparat, and direct
-URLs with WordPress-recognized video extensions. Provider
-iframe URLs are rebuilt from locally parsed IDs using fixed player hosts; stored
-iframe HTML and its attributes are never passed through. Unknown or malformed
-sources render nothing. No remote metadata, provider API, player SDK, or autoplay
-is used.
 
 ## Explore filter contract
 
@@ -169,18 +141,6 @@ tag lookup remain inside the Fahar portfolio adapter. The provider's secondary
 classification taxonomy is never exposed by Explore controls. Unknown slugs are
 discarded before the query is built. `fahar_theme_query_portfolios()` scopes the
 provider's normal-query exclusion override to Fahar listing queries.
-
-## Related portfolio query contract
-
-`fahar_theme_get_related_portfolios()` returns up to 6 published `WP_Post`
-objects by default, with a hard maximum of 12. It excludes the current item and
-duplicates, then fills results through configured verified taxonomies in order,
-the current normalized portfolio type, and finally newest portfolio items.
-Every stage requests only the remaining result count and uses deterministic
-date/ID descending order. The final trusted result can be adjusted through
-`fahar_theme_related_portfolios`, with current post and limit context; returned
-values are revalidated and bounded afterward. Presentation is intentionally
-deferred.
 
 ## Likes integration boundary
 

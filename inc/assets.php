@@ -49,14 +49,6 @@ function fahar_theme_enqueue_assets() {
 		fahar_theme_enqueue_component_assets( 'portfolio-explore', 'portfolio-explore' );
 	}
 
-	if ( fahar_theme_is_portfolio_single() ) {
-		fahar_theme_enqueue_style_asset( 'portfolio-card' );
-		fahar_theme_enqueue_component_assets( 'portfolio-single', 'portfolio-single' );
-
-		if ( comments_open() && get_option( 'thread_comments' ) ) {
-			wp_enqueue_script( 'comment-reply' );
-		}
-	}
 }
 add_action( 'wp_enqueue_scripts', 'fahar_theme_enqueue_assets', 20 );
 

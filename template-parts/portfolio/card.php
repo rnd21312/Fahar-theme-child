@@ -43,7 +43,6 @@ if ( '' === $fahar_card_title ) {
 
 $fahar_card_destination   = fahar_theme_get_portfolio_destination( $fahar_card_post );
 $fahar_card_url           = $fahar_card_destination['url'];
-$fahar_card_is_internal   = $fahar_card_destination['is_internal'];
 $fahar_card_opens_new_tab = $fahar_card_destination['opens_new_tab'];
 
 $fahar_card_cover_id  = fahar_theme_get_portfolio_cover_id( $fahar_card_post );
@@ -78,9 +77,6 @@ $fahar_card_class = $fahar_card_url ? 'fahar-portfolio-card fahar-portfolio-card
 		<a
 			class="fahar-portfolio-card__link"
 			href="<?php echo esc_url( $fahar_card_url ); ?>"
-			<?php if ( $fahar_card_is_internal ) : ?>
-				data-fahar-portfolio-detail
-			<?php endif; ?>
 			<?php if ( $fahar_card_opens_new_tab ) : ?>
 				target="_blank"
 				rel="noopener noreferrer"
@@ -128,7 +124,6 @@ unset(
 	$fahar_card_title,
 	$fahar_card_destination,
 	$fahar_card_url,
-	$fahar_card_is_internal,
 	$fahar_card_opens_new_tab,
 	$fahar_card_cover_id,
 	$fahar_card_cover_url,

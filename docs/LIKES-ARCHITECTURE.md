@@ -7,8 +7,9 @@ routes, and its public PHP API. The Child Theme owns only presentation and a
 defensive adapter to that API. Like data must survive a theme switch, and no
 template may read Like post meta or user meta directly.
 
-The existing Single Portfolio action area is the only future UI mount point.
-Task 20 adds no PHP helpers, UI, scripts, routes, or storage.
+Any future Single Portfolio Like UI belongs in an Elementor-owned template or
+companion-plugin widget. Task 20 adds no PHP helpers, UI, scripts, routes, or
+storage.
 
 ## Recommended v1
 
@@ -161,7 +162,7 @@ storage defeats continuity. It is not part of v1.
 
 ## Accessibility
 
-The future control belongs in the Task 17 action area and must be a real
+The future Elementor/plugin control must be a real
 `<button>` with visible text or an accessible name, visible focus, keyboard
 operation, and `aria-pressed`. Active state cannot rely on color alone. State
 and count changes must be announced accessibly without moving focus. The
@@ -170,14 +171,14 @@ copies no third-party social assets.
 
 ## Plugin-Unavailable Behavior
 
-If `fahar-elementor-core` is inactive, Single Portfolio rendering continues
-without errors. Theme adapters return safe fallbacks, the Like control is
-hidden, and the Theme performs no substitute writes. Counts and mutations are
-never reimplemented in the Child Theme.
+If `fahar-elementor-core` is inactive, normal WordPress/Elementor Single
+rendering continues without errors, the Like control is unavailable, and the
+Theme performs no substitute writes. Counts and mutations are never
+reimplemented in the Child Theme.
 
 ## Performance
 
-Single Portfolio reads are small local WordPress meta lookups with normal object
+Future plugin reads are small local WordPress meta lookups with normal object
 caching. Count lookup is O(1)-style; membership is linear only within the
 current user's Like array, which is the documented v1 scale limit. Mutations
 touch one user's canonical state, one portfolio count, and short-lived lock

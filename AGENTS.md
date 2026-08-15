@@ -41,7 +41,7 @@ Examples:
 - UI phase 1 / part 2: button hover/active/focus states
 - UI phase 1 / part 3: button sizes
 - Explore phase 1 / part 1: remove desktop sidebar layout only
-- Single phase 1 / part 1: media previous/next controls only
+- Explore phase 1 / part 1: card destination attributes only
 
 A microtask should normally:
 - touch 1–3 files; 4 only when technically inseparable;
@@ -81,20 +81,14 @@ Use `--fahar-*` tokens and `fahar-` classes. Page CSS owns composition/layout, n
 Use logical CSS, native modern CSS, RTL-safe behavior, `:focus-visible`, reduced motion and ~44px practical touch targets. No framework/icon-font/heavy visual dependency unless explicitly required.
 
 ## Portfolio contract
-Single media order from `fahar_theme_get_portfolio_media_items()`:
-1. Featured Image
-2. content media
-3. verified provider cover/lightbox/video
-4. remaining attachments
-
-Featured Image stays first when present. Supported media renders in `.fahar-portfolio-single__media`, never duplicated in description. Never mutate stored content or weaken provider/URL validation.
+Fahar owns Portfolio Explore only. Normal WordPress, Hello Elementor, and Elementor template resolution owns Portfolio Single presentation. The normalized `single-page` type must keep its normal WordPress permalink; never intercept portfolio singles, parse stored Elementor content, or add a replacement Single renderer.
 
 ## Code rules
 **JS:** vanilla, progressive enhancement, guarded DOM, conditional loading, minimal listeners/layout work. Prefer native scroll/snap, IntersectionObserver, ResizeObserver, requestAnimationFrame.
 
 **PHP:** WordPress APIs; `fahar_theme_*`; sanitize input; escape output; nonce/capability checks for mutations; no direct SQL/custom tables/new REST/AJAX unless task requires it; Elementor optional/defensive; never require Pro.
 
-**Performance:** mobile-first; conditional assets; responsive/intrinsic images; primary Single image may be eager/high priority; other media lazy; native video `preload="metadata"`; no autoplay feed media or eager remote embeds.
+**Performance:** mobile-first; conditional assets; responsive/intrinsic images; no autoplay feed media or eager remote embeds.
 
 **A11y/security:** semantic controls, keyboard/focus, accessible names, useful ARIA, contrast/touch/reduced-motion; sanitize/escape/validate/KSES; arbitrary stored embed HTML is forbidden.
 
@@ -105,12 +99,12 @@ Mobile nav: `template-parts/navigation/mobile-bottom-nav.php`, `assets/css/mobil
 
 Explore: relevant template/parts + `portfolio-explore.css`, `portfolio-card.css`, `portfolio-explore.js`; `inc/portfolio.php` only for data behavior.
 
-Single: relevant `template-parts/portfolio/*` + `portfolio-single.css`, `portfolio-single.js`; `inc/portfolio.php` only for data/media behavior.
+Single: owned by normal WordPress/Hello Elementor/Elementor resolution; no Fahar template routing or Single assets.
 
 ## Current state
 Foundation through static performance/accessibility QA is done. Do not restart Tasks 1–25.
 
-Known UX debt: permanent desktop Explore sidebar conflicts with full-width/no-sidebar target.
+Current Explore includes the approved five-column desktop feed and sticky desktop sidebar.
 
 ## Validation
 Run only what changed:

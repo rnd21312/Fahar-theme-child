@@ -22,7 +22,6 @@ $fahar_theme_modules = array(
 	'elementor',
 	'portfolio',
 	'rest-api',
-	'template-routing',
 	'navigation',
 	'assets',
 	'performance',

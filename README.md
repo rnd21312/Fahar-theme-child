@@ -1,6 +1,6 @@
 # Fahar Theme Child
 
-Fahar Theme Child is the presentation foundation for the Fahar portfolio experience. It remains a child of [Hello Elementor](https://wordpress.org/themes/hello-elementor/) and supports existing WordPress and Elementor-authored content while the product is developed incrementally.
+Fahar Theme Child owns the Portfolio Explore discovery experience. It remains a child of [Hello Elementor](https://wordpress.org/themes/hello-elementor/); normal WordPress and Elementor template resolution owns Portfolio Single presentation.
 
 ## Requirements and installation
 
@@ -13,11 +13,11 @@ Install the directory in `wp-content/themes/fahar-theme-child`, install Hello El
 
 ## Current status
 
-Phase 0 (repository bootstrap) is complete. The repository contains architecture and presentation scaffolding only: no production portfolio query, migration, masonry, filters, likes, AJAX, sliders, or custom Elementor widgets are implemented.
+Explore provides the portfolio query, search, filtering, cards, masonry, and progressive loading. Portfolio permalinks are not intercepted by the child theme.
 
 ## Architecture
 
-`functions.php` defines stable constants and loads focused modules from `inc/`. CSS is directly editable, ordered, and token-driven. JavaScript is dependency-free and conditionally loaded for future portfolio views. Template files are opt-in scaffolds and do not override an unknown portfolio post type.
+`functions.php` defines stable constants and loads focused modules from `inc/`. CSS is directly editable, ordered, and token-driven. Explore JavaScript is dependency-free and conditionally loaded. No child-theme Single Portfolio routing or renderer is registered.
 
 The child theme owns presentation. A future `fahar-elementor-core` plugin will own reusable Elementor widgets, controls, dynamic tags, endpoints, and other functionality that should survive a theme switch. See [Architecture](docs/ARCHITECTURE.md) and [Elementor integration](docs/ELEMENTOR-INTEGRATION.md).
 
@@ -27,7 +27,7 @@ The child theme owns presentation. A future `fahar-elementor-core` plugin will o
 - `assets/css/` — tokens and layered global/conditional styles
 - `assets/js/` — guarded vanilla JavaScript entry points
 - `template-parts/` — defensive semantic presentation fragments
-- `templates/` — manually selectable Explore and Single scaffolds
+- `templates/` — manually selectable Explore scaffold
 - `docs/` — architecture, integration, development, design, and roadmap decisions
 - `languages/` — future translation catalogs
 

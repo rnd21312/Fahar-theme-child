@@ -1,5 +1,9 @@
 # Codex Bootstrap Prompt — Fahar Theme Child
 
+> Historical bootstrap record only. It does not describe the current product
+> architecture: Fahar now owns Explore only, while WordPress/Hello Elementor/
+> Elementor owns Portfolio Single resolution and presentation.
+
 You are working inside an existing local Git repository named:
 
 `Fahar-theme-child`

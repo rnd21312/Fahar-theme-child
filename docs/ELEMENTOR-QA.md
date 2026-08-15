@@ -4,7 +4,7 @@
 
 - Theme bootstrap and defensive Elementor helpers
 - Header/footer shell ownership and Elementor Canvas behavior
-- Portfolio template routing and conditional assets
+- Explore conditional assets and normal Portfolio Single resolution
 - Global, layout, navigation, and Elementor compatibility CSS
 - Frontend JavaScript selectors and initialization guards
 - RTL-safe logical properties and Elementor absence safety
@@ -14,7 +14,7 @@
 - Elementor APIs are called only behind public function/action checks; Elementor can be inactive without causing a theme fatal error.
 - Elementor Theme Builder headers use `elementor_theme_do_location()` when available. Footer output remains delegated to the Hello Elementor parent instead of introducing a second detection mechanism.
 - Elementor Canvas suppresses the Fahar fallback header, header stylesheet, and mobile bottom navigation.
-- Portfolio routing remains limited to adapter-verified portfolio singles. Explore and Single assets load only on their respective theme-owned views.
+- Fahar does not intercept Portfolio Single requests or enqueue Single-specific assets; WordPress, Hello Elementor, and Elementor retain normal template resolution. Explore assets remain limited to the Explore view.
 - Fahar component styles and JavaScript selectors remain scoped; no generated Elementor selectors or jQuery assumptions are present.
 - Global typography uses low-specificity defaults, allowing Elementor widget and generated styles to take precedence. Layout utilities do not wrap normal Elementor page content.
 
