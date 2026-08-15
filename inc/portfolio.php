@@ -1139,141 +1139,214 @@ function fahar_theme_get_portfolio_html_media_items( $content, $post, $title ) {
 }
 
 /**
- * Collect content-authored media in Gutenberg/Classic authoring order.
+ * Split one final rendered portfolio document into media and description.
+ *
+ * DOMDocument is used when available so extraction and media removal share one
+ * document-order pass. The fallback preserves safe legacy behavior on hosts
+ * without the DOM extension.
  *
  * @internal
+ * @param string  $html  Rendered portfolio content.
  * @param WP_Post $post  Portfolio post.
- * @param string  $title Accessible portfolio title.
- * @return array<int, array<string, mixed>>
+ * @param string  $title Accessible fallback title.
+ * @return array{media:array<int, array<string, mixed>>,description:string}
  */
-function fahar_theme_get_portfolio_content_media_items( $post, $title ) {
-	$items  = array();
-	$blocks = parse_blocks( (string) $post->post_content );
-	$walk   = static function ( $block ) use ( &$walk, &$items, $post, $title ) {
-		if ( ! is_array( $block ) ) {
+function fahar_theme_split_portfolio_rendered_content( $html, $post, $title ) {
+	$empty = array(
+		'media'       => array(),
+		'description' => '',
+	);
+	$html  = (string) $html;
+
+	if ( '' === trim( $html ) ) {
+		return $empty;
+	}
+
+	if ( ! class_exists( 'DOMDocument' ) ) {
+		$empty['media']       = fahar_theme_get_portfolio_html_media_items( $html, $post, $title );
+		$empty['description'] = fahar_theme_strip_portfolio_description_media( $html );
+
+		return $empty;
+	}
+
+	$dom            = new DOMDocument();
+	$previous_state = libxml_use_internal_errors( true );
+	$loaded         = $dom->loadHTML(
+		'<?xml encoding="utf-8" ?><div id="fahar-content-split-root">' . $html . '</div>',
+		LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NONET
+	);
+	libxml_clear_errors();
+	libxml_use_internal_errors( $previous_state );
+
+	if ( ! $loaded ) {
+		return $empty;
+	}
+
+	$xpath = new DOMXPath( $dom );
+	$root  = $xpath->query( '//*[@id="fahar-content-split-root"]' )->item( 0 );
+
+	if ( ! $root instanceof DOMElement ) {
+		return $empty;
+	}
+
+	$items         = array();
+	$get_attachment = static function ( $node, $url = '' ) {
+		$attachment_id = 0;
+
+		if ( $node instanceof DOMElement ) {
+			foreach ( array( 'data-id', 'data-attachment-id' ) as $attribute ) {
+				$attachment_id = absint( $node->getAttribute( $attribute ) );
+
+				if ( $attachment_id ) {
+					break;
+				}
+			}
+
+			if ( ! $attachment_id && preg_match( '/(?:^|\s)wp-(?:image|video)-(\d+)(?:\s|$)/', $node->getAttribute( 'class' ), $matches ) ) {
+				$attachment_id = absint( $matches[1] );
+			}
+		}
+
+		if ( ! $attachment_id && is_string( $url ) && $url ) {
+			$attachment_id = attachment_url_to_postid( $url );
+		}
+
+		return fahar_theme_normalize_attachment_id( $attachment_id );
+	};
+	$remove_node    = static function ( $node ) use ( $root ) {
+		if ( ! $node instanceof DOMNode || ! $node->parentNode ) {
 			return;
 		}
 
-		$name  = isset( $block['blockName'] ) ? (string) $block['blockName'] : '';
-		$attrs = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
+		$parent = $node->parentNode;
+		$parent->removeChild( $node );
 
-		if ( 'core/image' === $name && ! empty( $attrs['id'] ) ) {
-			$item = fahar_theme_prepare_portfolio_content_image_item( $attrs['id'], isset( $attrs['url'] ) ? $attrs['url'] : '', $title, $attrs );
-
-			if ( $item ) {
-				$items[] = $item;
-			}
-		} elseif ( 'core/gallery' === $name && ! empty( $attrs['ids'] ) ) {
-			foreach ( wp_parse_id_list( $attrs['ids'] ) as $image_id ) {
-				$item = fahar_theme_prepare_portfolio_content_image_item( $image_id, '', $title );
-
-				if ( $item ) {
-					$items[] = $item;
-				}
-			}
-		} elseif ( 'core/cover' === $name ) {
-			$item = fahar_theme_prepare_portfolio_content_image_item(
-				isset( $attrs['id'] ) ? $attrs['id'] : 0,
-				isset( $attrs['url'] ) ? $attrs['url'] : '',
-				$title,
-				$attrs
-			);
-
-			if ( $item ) {
-				$items[] = $item;
-			}
-		} elseif ( 'core/video' === $name ) {
-			$video_url = ! empty( $attrs['src'] ) ? $attrs['src'] : '';
-
-			if ( ! $video_url && ! empty( $attrs['id'] ) ) {
-				$video_url = wp_get_attachment_url( absint( $attrs['id'] ) );
+		while ( $parent instanceof DOMElement && $parent !== $root ) {
+			if ( '' !== trim( $parent->textContent ) || $parent->hasChildNodes() ) {
+				break;
 			}
 
-			$item = fahar_theme_prepare_portfolio_video_media_item( $video_url, $title );
+			$next_parent = $parent->parentNode;
 
-			if ( $item ) {
-				$item['attachment_id'] = ! empty( $attrs['id'] ) ? absint( $attrs['id'] ) : 0;
-				$item['origin']        = 'content';
-				$items[]               = $item;
-			}
-		} elseif ( 'core/embed' === $name || 0 === strpos( $name, 'core-embed/' ) ) {
-			$item = fahar_theme_prepare_portfolio_video_media_item( isset( $attrs['url'] ) ? $attrs['url'] : '', $title );
-
-			if ( $item ) {
-				$item['origin'] = 'content';
-				$items[]        = $item;
-			}
-		}
-
-		$inner_blocks = isset( $block['innerBlocks'] ) ? array_values( (array) $block['innerBlocks'] ) : array();
-		$inner_index  = 0;
-		$inner_parts  = isset( $block['innerContent'] ) ? (array) $block['innerContent'] : array();
-
-		if ( ! $inner_parts && isset( $block['innerHTML'] ) ) {
-			$inner_parts = array( $block['innerHTML'] );
-		}
-
-		foreach ( $inner_parts as $inner_part ) {
-			if ( null === $inner_part ) {
-				if ( isset( $inner_blocks[ $inner_index ] ) ) {
-					$walk( $inner_blocks[ $inner_index ] );
-				}
-
-				++$inner_index;
-				continue;
+			if ( ! $next_parent ) {
+				break;
 			}
 
-			$items = array_merge( $items, fahar_theme_get_portfolio_html_media_items( (string) $inner_part, $post, $title ) );
-		}
-
-		while ( isset( $inner_blocks[ $inner_index ] ) ) {
-			$walk( $inner_blocks[ $inner_index ] );
-			++$inner_index;
+			$next_parent->removeChild( $parent );
+			$parent = $next_parent;
 		}
 	};
+	$media_nodes    = iterator_to_array( $xpath->query( './/picture|.//img|.//video|.//iframe|.//embed|.//object', $root ) );
 
-	foreach ( $blocks as $block ) {
-		$walk( $block );
+	foreach ( $media_nodes as $node ) {
+		if ( ! $node instanceof DOMElement || ! $node->parentNode ) {
+			continue;
+		}
+
+		$tag        = strtolower( $node->tagName );
+		$parent_tag = $node->parentNode instanceof DOMElement ? strtolower( $node->parentNode->tagName ) : '';
+		$item       = array();
+
+		if ( 'picture' === $tag ) {
+			$image = $xpath->query( './/img', $node )->item( 0 );
+
+			if ( $image instanceof DOMElement ) {
+				$url  = $image->getAttribute( 'src' );
+				$item = fahar_theme_prepare_portfolio_content_image_item(
+					$get_attachment( $image, $url ),
+					$url,
+					$title,
+					array(
+						'alt'    => $image->getAttribute( 'alt' ),
+						'width'  => $image->getAttribute( 'width' ),
+						'height' => $image->getAttribute( 'height' ),
+					)
+				);
+			}
+		} elseif ( 'img' === $tag && 'picture' !== $parent_tag ) {
+			$url  = $node->getAttribute( 'src' );
+			$item = fahar_theme_prepare_portfolio_content_image_item(
+				$get_attachment( $node, $url ),
+				$url,
+				$title,
+				array(
+					'alt'    => $node->getAttribute( 'alt' ),
+					'width'  => $node->getAttribute( 'width' ),
+					'height' => $node->getAttribute( 'height' ),
+				)
+			);
+		} elseif ( 'video' === $tag ) {
+			$urls = array( $node->getAttribute( 'src' ) );
+
+			foreach ( $node->getElementsByTagName( 'source' ) as $source ) {
+				$urls[] = $source->getAttribute( 'src' );
+			}
+
+			foreach ( $urls as $url ) {
+				$item = fahar_theme_prepare_portfolio_video_media_item( $url, $title );
+
+				if ( $item ) {
+					$attachment_id = $get_attachment( $node, $url );
+
+					if ( $attachment_id ) {
+						$item['attachment_id'] = $attachment_id;
+					}
+
+					break;
+				}
+			}
+		} elseif ( in_array( $tag, array( 'iframe', 'embed', 'object' ), true ) ) {
+			$url  = 'object' === $tag ? $node->getAttribute( 'data' ) : $node->getAttribute( 'src' );
+			$item = fahar_theme_prepare_portfolio_video_media_item( $url, $title );
+		}
+
+		if ( $item ) {
+			$item['origin'] = 'content';
+			$items[]        = $item;
+		}
+
+		$remove_node( $node );
 	}
 
-	if ( function_exists( 'fahar_theme_get_elementor_portfolio_media_items' ) ) {
-		$items = array_merge( $items, fahar_theme_get_elementor_portfolio_media_items( $post, $title ) );
+	foreach ( iterator_to_array( $xpath->query( './/script|.//style|.//audio|.//source|.//track|.//param', $root ) ) as $node ) {
+		$remove_node( $node );
 	}
 
-	return $items;
-}
+	foreach ( iterator_to_array( $xpath->query( './/*[@style]', $root ) ) as $node ) {
+		if ( ! $node instanceof DOMElement ) {
+			continue;
+		}
 
-/**
- * Suppress media blocks while rendering the frontend description.
- *
- * @internal
- * @param string $block_content Rendered block markup.
- * @param array  $block         Parsed block data.
- * @return string
- */
-function fahar_theme_suppress_portfolio_media_block( $block_content, $block ) {
-	$name = isset( $block['blockName'] ) ? (string) $block['blockName'] : '';
+		$declarations = array_filter(
+			array_map( 'trim', explode( ';', $node->getAttribute( 'style' ) ) ),
+			static function ( $declaration ) {
+				return '' !== $declaration && 1 !== preg_match( '/^(?:background(?:-image)?|content)\s*:/i', $declaration );
+			}
+		);
 
-	if (
-		in_array( $name, array( 'core/image', 'core/gallery', 'core/video', 'core/embed' ), true )
-		|| 0 === strpos( $name, 'core-embed/' )
-	) {
-		return '';
+		if ( $declarations ) {
+			$node->setAttribute( 'style', implode( '; ', $declarations ) );
+		} else {
+			$node->removeAttribute( 'style' );
+		}
 	}
 
-	return $block_content;
-}
+	$description = '';
 
-/**
- * Prevent supported media shortcodes from rendering in the description.
- *
- * @internal
- * @param false|string $return Short-circuit value.
- * @param string       $tag    Shortcode tag.
- * @return false|string
- */
-function fahar_theme_prevent_portfolio_media_shortcode( $return, $tag ) {
-	return in_array( $tag, array( 'gallery', 'video', 'embed', 'wpvideo' ), true ) ? '' : $return;
+	foreach ( iterator_to_array( $root->childNodes ) as $child ) {
+		$description .= $dom->saveHTML( $child );
+	}
+
+	$allowed_html = wp_kses_allowed_html( 'post' );
+
+	foreach ( array( 'picture', 'img', 'video', 'audio', 'source', 'track', 'iframe', 'embed', 'object', 'param' ) as $media_tag ) {
+		unset( $allowed_html[ $media_tag ] );
+	}
+
+	return array(
+		'media'       => $items,
+		'description' => trim( wp_kses( $description, $allowed_html ) ),
+	);
 }
 
 /**
@@ -1446,24 +1519,9 @@ function fahar_theme_get_portfolio_content_transform( $post = null ) {
 
 	$title = trim( get_the_title( $post ) );
 	$title = $title ? $title : __( 'نمونه‌کار', 'fahar-theme-child' );
-	$media = fahar_theme_get_portfolio_content_media_items( $post, $title );
+	$rendered = apply_filters( 'the_content', (string) $post->post_content );
 
-	$cache[ $post->ID ] = array(
-		'media'       => $media,
-		'description' => '',
-	);
-
-	add_filter( 'render_block', 'fahar_theme_suppress_portfolio_media_block', 10, 2 );
-	add_filter( 'pre_do_shortcode_tag', 'fahar_theme_prevent_portfolio_media_shortcode', 10, 2 );
-
-	try {
-		$description = apply_filters( 'the_content', (string) $post->post_content );
-	} finally {
-		remove_filter( 'render_block', 'fahar_theme_suppress_portfolio_media_block', 10 );
-		remove_filter( 'pre_do_shortcode_tag', 'fahar_theme_prevent_portfolio_media_shortcode', 10 );
-	}
-
-	$cache[ $post->ID ]['description'] = fahar_theme_strip_portfolio_description_media( $description );
+	$cache[ $post->ID ] = fahar_theme_split_portfolio_rendered_content( $rendered, $post, $title );
 
 	return $cache[ $post->ID ];
 }
@@ -1473,8 +1531,8 @@ function fahar_theme_get_portfolio_content_transform( $post = null ) {
  *
  * A valid WordPress Featured Image always leads. Content-authored media follows
  * in authoring order, then verified Astra cover/lightbox/video media, and then
- * remaining attached media. Without a Featured Image, the best verified cover
- * leads. Attachment IDs and canonical URLs are deduplicated across sources.
+ * remaining attached media. Without a Featured Image, the first valid content
+ * item leads. Attachment IDs and canonical URLs are deduplicated across sources.
  *
  * @param int|WP_Post|null $post Post ID, post object, or current post.
  * @return array<int, array<string, mixed>>

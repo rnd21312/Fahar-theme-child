@@ -323,8 +323,19 @@
 }
 
 .fahar-portfolio-description.is-collapsible.is-collapsed .fahar-portfolio-description__content {
+	position: relative;
 	max-block-size: var(--fahar-description-collapsed-size);
 	overflow: hidden;
+}
+
+.fahar-portfolio-description.is-collapsible.is-collapsed .fahar-portfolio-description__content::after {
+	position: absolute;
+	inset-inline: 0;
+	inset-block-end: 0;
+	block-size: var(--fahar-space-6);
+	background: linear-gradient(transparent, var(--fahar-color-surface-1));
+	content: '';
+	pointer-events: none;
 }
 
 .fahar-portfolio-description__toggle {

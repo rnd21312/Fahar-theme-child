@@ -40,13 +40,13 @@ $fahar_description_content_id = wp_unique_id( 'fahar-portfolio-description-conte
 		type="button"
 		class="fahar-portfolio-description__toggle"
 		data-fahar-description-toggle
-		data-label-collapsed="<?php esc_attr_e( 'نمایش بیشتر', 'fahar-theme-child' ); ?>"
+		data-label-collapsed="<?php esc_attr_e( 'خواندن بیشتر', 'fahar-theme-child' ); ?>"
 		data-label-expanded="<?php esc_attr_e( 'نمایش کمتر', 'fahar-theme-child' ); ?>"
 		aria-expanded="true"
 		aria-controls="<?php echo esc_attr( $fahar_description_content_id ); ?>"
 		hidden
 	>
-		<?php esc_html_e( 'نمایش بیشتر', 'fahar-theme-child' ); ?>
+		<?php esc_html_e( 'خواندن بیشتر', 'fahar-theme-child' ); ?>
 	</button>
 </section>
 <?php

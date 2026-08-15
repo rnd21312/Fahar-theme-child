@@ -319,16 +319,41 @@
 			return;
 		}
 
-		const hasFocusableContent = Boolean(content.querySelector(focusableSelector));
+		const focusableContent = Array.from(content.querySelectorAll(focusableSelector));
 		let userExpanded = false;
 		let measurementFrame = 0;
 		let lastInlineSize = null;
+
+		const setFocusableState = (expanded) => {
+			const contentBottom = content.getBoundingClientRect().bottom;
+
+			focusableContent.forEach((element) => {
+				const isVisible = expanded || element.getBoundingClientRect().top < contentBottom;
+
+				if (isVisible) {
+					if (element.hasAttribute('data-fahar-original-tabindex')) {
+						const originalTabindex = element.getAttribute('data-fahar-original-tabindex');
+						element.removeAttribute('data-fahar-original-tabindex');
+
+						if (originalTabindex === '') {
+							element.removeAttribute('tabindex');
+						} else {
+							element.setAttribute('tabindex', originalTabindex);
+						}
+					}
+				} else if (!element.hasAttribute('data-fahar-original-tabindex')) {
+					element.setAttribute('data-fahar-original-tabindex', element.getAttribute('tabindex') || '');
+					element.setAttribute('tabindex', '-1');
+				}
+			});
+		};
 
 		const setExpanded = (expanded) => {
 			description.classList.toggle('is-collapsed', !expanded);
 			description.classList.toggle('is-expanded', expanded);
 			toggle.setAttribute('aria-expanded', String(expanded));
 			toggle.textContent = expanded ? expandedLabel : collapsedLabel;
+			setFocusableState(expanded);
 		};
 
 		const getCollapsedSize = () => {
@@ -344,13 +369,6 @@
 		const evaluate = () => {
 			measurementFrame = 0;
 
-			if (hasFocusableContent) {
-				description.classList.remove('is-collapsible', 'is-collapsed', 'is-expanded');
-				toggle.hidden = true;
-				toggle.setAttribute('aria-expanded', 'true');
-				return;
-			}
-
 			const collapsedSize = getCollapsedSize();
 			const needsCollapse = Number.isFinite(collapsedSize) && content.scrollHeight > collapsedSize + 8;
 
@@ -358,6 +376,7 @@
 				description.classList.remove('is-collapsible', 'is-collapsed', 'is-expanded');
 				toggle.hidden = true;
 				toggle.setAttribute('aria-expanded', 'true');
+				setFocusableState(true);
 				return;
 			}
 
