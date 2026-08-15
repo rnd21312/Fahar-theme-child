@@ -482,24 +482,45 @@ function fahar_theme_get_portfolio_media_candidate_url( $attributes, $allow_srcs
 		return '';
 	}
 
-	foreach ( array( 'srcset', 'data-srcset' ) as $attribute ) {
+	foreach ( array( 'data-srcset', 'srcset' ) as $attribute ) {
 		if ( empty( $attributes[ $attribute ] ) || ! is_string( $attributes[ $attribute ] ) ) {
 			continue;
 		}
 
-		$valid_url = '';
+		$best_url     = '';
+		$best_width   = -1;
+		$best_density = -1;
+		$fallback_url = '';
 
 		foreach ( explode( ',', $attributes[ $attribute ] ) as $candidate ) {
-			$candidate_parts = preg_split( '/\s+/', trim( $candidate ) );
-			$candidate_url   = isset( $candidate_parts[0] ) ? fahar_theme_normalize_http_url( $candidate_parts[0] ) : '';
+			if ( ! preg_match( '/^\s*(\S+)(?:\s+([0-9]+(?:\.[0-9]+)?)(w|x))?\s*$/i', $candidate, $matches ) ) {
+				continue;
+			}
 
-			if ( $candidate_url ) {
-				$valid_url = $candidate_url;
+			$candidate_url = fahar_theme_normalize_http_url( $matches[1] );
+
+			if ( ! $candidate_url || fahar_theme_is_portfolio_placeholder_image( $candidate_url ) ) {
+				continue;
+			}
+
+			if ( ! $fallback_url ) {
+				$fallback_url = $candidate_url;
+			}
+
+			$descriptor = isset( $matches[2] ) ? (float) $matches[2] : 0;
+			$unit       = isset( $matches[3] ) ? strtolower( $matches[3] ) : '';
+
+			if ( 'w' === $unit && $descriptor > $best_width ) {
+				$best_width = $descriptor;
+				$best_url   = $candidate_url;
+			} elseif ( $best_width < 0 && 'x' === $unit && $descriptor > $best_density ) {
+				$best_density = $descriptor;
+				$best_url     = $candidate_url;
 			}
 		}
 
-		if ( $valid_url ) {
-			return $valid_url;
+		if ( $best_url || $fallback_url ) {
+			return $best_url ? $best_url : $fallback_url;
 		}
 	}
 
@@ -542,17 +563,24 @@ function fahar_theme_is_portfolio_placeholder_image( $url, $attachment_id = 0, $
  */
 function fahar_theme_get_portfolio_image_candidate_url( $attributes, $attachment_id = 0 ) {
 	$attributes = is_array( $attributes ) ? $attributes : array();
+	$attachment_id = fahar_theme_normalize_image_attachment_id( $attachment_id );
 
-	foreach ( array( 'src', 'data-src', 'data-lazy-src', 'data-original', 'data-orig-file' ) as $attribute ) {
+	if ( $attachment_id ) {
+		$attachment_url = fahar_theme_normalize_http_url( wp_get_attachment_url( $attachment_id ) );
+
+		if ( $attachment_url ) {
+			return $attachment_url;
+		}
+	}
+
+	foreach ( array( 'data-src', 'data-lazy-src', 'data-original', 'data-orig-file' ) as $attribute ) {
 		$url = isset( $attributes[ $attribute ] ) ? fahar_theme_normalize_http_url( $attributes[ $attribute ] ) : '';
 
 		if ( ! $url ) {
 			continue;
 		}
 
-		$placeholder_attributes = 'src' === $attribute ? $attributes : array();
-
-		if ( ! fahar_theme_is_portfolio_placeholder_image( $url, $attachment_id, $placeholder_attributes ) ) {
+		if ( ! fahar_theme_is_portfolio_placeholder_image( $url ) ) {
 			return $url;
 		}
 	}
@@ -565,7 +593,13 @@ function fahar_theme_get_portfolio_image_candidate_url( $attributes, $attachment
 		true
 	);
 
-	return $url && ! fahar_theme_is_portfolio_placeholder_image( $url, $attachment_id ) ? $url : '';
+	if ( $url ) {
+		return $url;
+	}
+
+	$url = isset( $attributes['src'] ) ? fahar_theme_normalize_http_url( $attributes['src'] ) : '';
+
+	return $url && ! fahar_theme_is_portfolio_placeholder_image( $url, 0, $attributes ) ? $url : '';
 }
 
 /**
@@ -1482,6 +1516,7 @@ function fahar_theme_split_portfolio_rendered_content( $html, $post, $title ) {
 
 			$poster_node    = null;
 			$poster_wrapper = null;
+			$poster_wrapper_is_media_only = false;
 			$poster_id      = 0;
 			$poster_url     = fahar_theme_normalize_http_url(
 				! empty( $attributes['poster'] ) ? $attributes['poster'] : ( isset( $attributes['data-poster'] ) ? $attributes['data-poster'] : '' )
@@ -1493,17 +1528,34 @@ function fahar_theme_split_portfolio_rendered_content( $html, $post, $title ) {
 
 				while ( $ancestor instanceof DOMElement && $ancestor !== $root && $depth < 4 ) {
 					$class_name  = strtolower( $ancestor->getAttribute( 'class' ) );
-					$tag_name    = strtolower( $ancestor->tagName );
 					$video_count = $xpath->query( './/video|.//iframe|.//embed|.//object', $ancestor )->length;
 					$images      = $xpath->query( './/img', $ancestor );
-					$has_prose   = $xpath->query( './/figcaption|.//p|.//h1|.//h2|.//h3|.//h4|.//h5|.//h6|.//ul|.//ol|.//blockquote', $ancestor )->length > 0;
-					$is_media_ui = 'figure' === $tag_name
-						|| 1 === preg_match( '/(?:^|[\s_-])(?:video|embed|player|media|lightbox)(?:[\s_-]|$)/', $class_name )
-						|| ( ! $has_prose && '' === trim( $ancestor->textContent ) );
+					$has_gallery = 1 === preg_match( '/(?:^|[\s_-])gallery(?:[\s_-]|$)/', $class_name );
+					$has_links   = $xpath->query( './/a', $ancestor )->length > 0;
+					$has_semantic_content = $xpath->query( './/figcaption|.//p|.//h1|.//h2|.//h3|.//h4|.//h5|.//h6|.//ul|.//ol|.//blockquote|.//table|.//section|.//article', $ancestor )->length > 0;
+					$has_meaningful_text  = $xpath->query( './/text()[normalize-space() and not(ancestor::button) and not(ancestor::svg)]', $ancestor )->length > 0;
+					$is_media_only        = 1 === $video_count
+						&& 1 === $images->length
+						&& ! $has_gallery
+						&& ! $has_links
+						&& ! $has_semantic_content
+						&& ! $has_meaningful_text;
 
-					if ( $is_media_ui && 1 === $video_count && $images->length > 0 ) {
+					if ( $is_media_only ) {
+						$allowed_media_tags = array( 'div', 'span', 'figure', 'picture', 'img', 'video', 'source', 'track', 'iframe', 'embed', 'object', 'button', 'svg', 'path' );
+
+						foreach ( iterator_to_array( $xpath->query( './/*', $ancestor ) ) as $descendant ) {
+							if ( $descendant instanceof DOMElement && ! in_array( strtolower( $descendant->tagName ), $allowed_media_tags, true ) ) {
+								$is_media_only = false;
+								break;
+							}
+						}
+					}
+
+					if ( $is_media_only ) {
 						$poster_node    = $images->item( 0 );
 						$poster_wrapper = $ancestor;
+						$poster_wrapper_is_media_only = true;
 						break;
 					}
 
@@ -1535,8 +1587,7 @@ function fahar_theme_split_portfolio_rendered_content( $html, $post, $title ) {
 			$item['origin'] = 'content';
 			$items[]        = $item;
 
-			$remove_wrapper = $poster_wrapper instanceof DOMElement
-				&& 0 === $xpath->query( './/figcaption|.//p|.//h1|.//h2|.//h3|.//h4|.//h5|.//h6|.//ul|.//ol|.//blockquote', $poster_wrapper )->length;
+			$remove_wrapper = $poster_wrapper_is_media_only && $poster_wrapper instanceof DOMElement;
 
 			if ( $remove_wrapper ) {
 				$remove_node( $poster_wrapper );

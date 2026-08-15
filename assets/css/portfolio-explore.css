@@ -586,7 +586,11 @@ body.fahar-filter-surface-open {
 	}
 
 	.fahar-explore__sidebar {
+		position: sticky;
+		inset-block-start: calc(var(--fahar-header-height) + var(--fahar-space-3));
 		grid-row: 1 / span 2;
+		align-self: start;
+		max-block-size: calc(100svh - var(--fahar-header-height) - (2 * var(--fahar-space-3)));
 	}
 
 	.fahar-explore-active,
@@ -599,11 +603,10 @@ body.fahar-filter-surface-open {
 	}
 
 	.fahar-explore__sidebar-inner {
-		position: sticky;
-		inset-block-start: calc(var(--fahar-header-height) + var(--fahar-space-3));
+		position: static;
 		grid-template-columns: minmax(0, 1fr);
 		align-items: start;
-		max-block-size: calc(100svh - var(--fahar-header-height) - (2 * var(--fahar-space-3)));
+		max-block-size: inherit;
 		padding-inline-end: var(--fahar-space-1);
 		overflow-y: auto;
 		overscroll-behavior: contain;
@@ -662,7 +665,7 @@ body.fahar-filter-surface-open {
 	}
 }
 
-@media (min-width: 80rem) {
+@media (min-width: 75rem) {
 	.fahar-explore__grid {
 		grid-template-columns: repeat(5, minmax(0, 1fr));
 	}

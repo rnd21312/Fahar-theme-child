@@ -132,15 +132,15 @@
 		}
 
 		let fallbackTimer = 0;
-		const dismissPoster = () => {
+		const revealVideo = () => {
 			window.clearTimeout(fallbackTimer);
 			poster.hidden = true;
 			poster.setAttribute('aria-hidden', 'true');
 		};
 
-		iframe.addEventListener('load', dismissPoster, { once: true });
+		iframe.addEventListener('load', revealVideo, { once: true });
 		poster.addEventListener('click', () => {
-			dismissPoster();
+			revealVideo();
 			iframe.focus({ preventScroll: true });
 		});
 		poster.hidden = false;

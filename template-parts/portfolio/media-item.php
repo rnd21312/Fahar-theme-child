@@ -162,7 +162,7 @@ if ( 'image' === $fahar_media_type ) {
 					class="fahar-portfolio-media__poster"
 					type="button"
 					data-fahar-video-poster
-					aria-label="<?php echo esc_attr( sprintf( __( 'پخش %s', 'fahar-theme-child' ), $fahar_media_title ) ); ?>"
+					aria-label="<?php echo esc_attr( sprintf( __( 'نمایش ویدیو: %s', 'fahar-theme-child' ), $fahar_media_title ) ); ?>"
 					hidden
 				>
 					<?php if ( $fahar_media_poster ) : ?>
