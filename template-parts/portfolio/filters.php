@@ -74,8 +74,8 @@ if ( ! $fahar_filter_categories ) {
 
 				<?php if ( $fahar_filter_has_category && $fahar_filter_tags ) : ?>
 					<nav class="fahar-filter-group" aria-labelledby="<?php echo esc_attr( $fahar_filter_instance ); ?>-tags">
-						<h3 id="<?php echo esc_attr( $fahar_filter_instance ); ?>-tags" class="fahar-filter-group__legend"><?php esc_html_e( 'برچسب‌های مرتبط', 'fahar-theme-child' ); ?></h3>
-						<ul class="fahar-filter-options">
+						<h3 id="<?php echo esc_attr( $fahar_filter_instance ); ?>-tags" class="fahar-filter-group__legend"><?php esc_html_e( 'برچسب‌ها', 'fahar-theme-child' ); ?></h3>
+						<ul class="fahar-filter-options fahar-filter-options--tags">
 							<li>
 								<a class="fahar-filter-option" href="<?php echo esc_url( $fahar_filter_all_tags_url ); ?>" <?php if ( ! $fahar_filter_has_tag ) : ?>aria-current="page"<?php endif; ?>>
 									<span><?php esc_html_e( 'همه برچسب‌ها', 'fahar-theme-child' ); ?></span>

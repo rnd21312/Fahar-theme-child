@@ -247,6 +247,11 @@ get_header();
 								aria-controls="<?php echo esc_attr( $fahar_search_listbox_id ); ?>"
 								data-fahar-search-input
 							>
+							<?php if ( '' !== $fahar_search_term ) : ?>
+								<a class="fahar-explore-search__clear" href="<?php echo esc_url( $fahar_search_clear_url ); ?>" aria-label="<?php esc_attr_e( 'پاک‌کردن جستجو', 'fahar-theme-child' ); ?>">
+									<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" /></svg>
+								</a>
+							<?php endif; ?>
 						</div>
 						<?php if ( $fahar_selected_category instanceof WP_Term ) : ?>
 							<input type="hidden" name="portfolio_category" value="<?php echo esc_attr( $fahar_selected_category->slug ); ?>">
@@ -276,38 +281,6 @@ get_header();
 					?>
 				</div>
 			</aside>
-
-			<?php if ( '' !== $fahar_search_term || $fahar_has_filters ) : ?>
-				<div class="fahar-explore-active" aria-label="<?php esc_attr_e( 'زمینه فعال کاوش', 'fahar-theme-child' ); ?>">
-					<div class="fahar-explore-active__items">
-						<?php if ( '' !== $fahar_search_term ) : ?>
-							<span class="fahar-explore-active__item">
-								<?php
-								printf(
-									/* translators: %s: current portfolio search phrase. */
-									esc_html__( 'جستجو: «%s»', 'fahar-theme-child' ),
-									esc_html( $fahar_search_term )
-								);
-								?>
-							</span>
-						<?php endif; ?>
-						<?php if ( $fahar_selected_category instanceof WP_Term ) : ?>
-							<span class="fahar-explore-active__item"><?php echo esc_html( $fahar_selected_category->name ); ?></span>
-						<?php endif; ?>
-						<?php if ( $fahar_selected_tag instanceof WP_Term ) : ?>
-							<span class="fahar-explore-active__item"><?php echo esc_html( $fahar_selected_tag->name ); ?></span>
-						<?php endif; ?>
-					</div>
-					<div class="fahar-explore-active__actions">
-						<?php if ( '' !== $fahar_search_term ) : ?>
-							<a class="fahar-explore-search__clear" href="<?php echo esc_url( $fahar_search_clear_url ); ?>"><?php esc_html_e( 'پاک‌کردن جستجو', 'fahar-theme-child' ); ?></a>
-						<?php endif; ?>
-						<?php if ( $fahar_has_filters ) : ?>
-							<a class="fahar-filter-reset" href="<?php echo esc_url( $fahar_filter_reset_url ); ?>"><?php esc_html_e( 'پاک‌کردن فیلترها', 'fahar-theme-child' ); ?></a>
-						<?php endif; ?>
-					</div>
-				</div>
-			<?php endif; ?>
 
 			<section class="fahar-explore__results" aria-labelledby="fahar-explore-results-title">
 				<h2 id="fahar-explore-results-title" class="screen-reader-text"><?php esc_html_e( 'نتایج نمونه‌کارها', 'fahar-theme-child' ); ?></h2>

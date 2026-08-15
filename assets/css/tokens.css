@@ -10,16 +10,17 @@
 	color-scheme: dark;
 
 	/* Color: neutral dark surfaces with Desert Gold reserved for primary brand actions. */
-	--fahar-color-bg: #0a0a0a;
-	--fahar-color-surface: #171717;
-	--fahar-color-surface-elevated: #202020;
-	--fahar-color-surface-active: #121212;
-	--fahar-color-surface-disabled: #2d2d2d;
-	--fahar-color-text: #fff;
-	--fahar-color-text-secondary: #e5e5e5;
-	--fahar-color-text-muted: #a3a3a3;
-	--fahar-color-border: rgb(255 255 255 / 10%);
-	--fahar-color-border-strong: rgb(255 255 255 / 22%);
+	--fahar-color-bg: #0a0a0b;
+	--fahar-color-surface: #111214;
+	--fahar-color-surface-elevated: #17181b;
+	--fahar-color-surface-active: #1d1f22;
+	--fahar-color-surface-selected: #24262a;
+	--fahar-color-surface-disabled: #2d2f33;
+	--fahar-color-text: #f5f5f5;
+	--fahar-color-text-secondary: #d2d4d7;
+	--fahar-color-text-muted: #8b8e94;
+	--fahar-color-border: rgb(255 255 255 / 8%);
+	--fahar-color-border-strong: rgb(255 255 255 / 14%);
 	--fahar-color-media-overlay: rgb(0 0 0 / 72%);
 	--fahar-color-media-overlay-soft: rgb(0 0 0 / 18%);
 	--fahar-color-media-overlay-border: rgb(255 255 255 / 26%);
@@ -44,11 +45,11 @@
 	/* Shared neutral control states. */
 	--fahar-color-control: var(--fahar-color-surface);
 	--fahar-color-control-text: var(--fahar-color-text-secondary);
-	--fahar-color-control-hover: var(--fahar-color-surface-elevated);
+	--fahar-color-control-hover: var(--fahar-color-surface-active);
 	--fahar-color-control-hover-text: var(--fahar-color-text);
-	--fahar-color-control-active: var(--fahar-color-surface-active);
+	--fahar-color-control-active: var(--fahar-color-surface-selected);
 	--fahar-color-control-active-text: var(--fahar-color-text);
-	--fahar-color-control-selected: #303030;
+	--fahar-color-control-selected: var(--fahar-color-surface-selected);
 	--fahar-color-control-selected-text: var(--fahar-color-text);
 	--fahar-color-control-disabled: var(--fahar-color-button-disabled);
 	--fahar-color-control-disabled-text: var(--fahar-color-button-disabled-text);
@@ -66,6 +67,7 @@
 	--fahar-weight-bold: 700;
 	--fahar-text-meta: 0.75rem;
 	--fahar-text-body-sm: 0.875rem;
+	--fahar-text-control: 0.9375rem;
 	--fahar-text-body: 1rem;
 	--fahar-text-body-lg: 1.125rem;
 	--fahar-text-heading-4: clamp(1.125rem, 1.07rem + 0.2vw, 1.25rem);
@@ -90,7 +92,7 @@
 	/* Radius: soft containers with restrained controls. */
 	--fahar-radius-sm: 0.375rem;
 	--fahar-radius-md: 0.625rem;
-	--fahar-radius-lg: 1rem;
+	--fahar-radius-lg: 0.875rem;
 	--fahar-radius-xl: 1.5rem;
 	--fahar-radius-pill: 999px;
 	--fahar-radius-round: 50%;
@@ -128,10 +130,11 @@
 	--fahar-focus-ring-width: 2px;
 	--fahar-focus-ring-offset: 3px;
 	--fahar-focus-ring: 0 0 0 3px rgb(240 201 110 / 28%);
+	--fahar-accent-marker-width: 0.1875rem;
 
 	/* Compatibility aliases for existing Fahar components. */
 	--fahar-color-background: var(--fahar-color-bg);
-	--fahar-color-background-elevated: var(--fahar-color-surface-active);
+	--fahar-color-background-elevated: var(--fahar-color-surface-elevated);
 	--fahar-color-surface-1: var(--fahar-color-surface);
 	--fahar-color-surface-2: var(--fahar-color-surface-elevated);
 	--fahar-color-surface-3: var(--fahar-color-surface-disabled);
