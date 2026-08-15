@@ -33,7 +33,7 @@ if ( ! $fahar_filter_categories ) {
 }
 ?>
 <div class="fahar-explore-discovery" data-fahar-filter-root>
-	<button class="fahar-filter-trigger" type="button" aria-expanded="false" aria-controls="<?php echo esc_attr( $fahar_filter_panel_id ); ?>" data-fahar-filter-trigger hidden>
+	<button class="fahar-button fahar-button--secondary fahar-filter-trigger" type="button" aria-expanded="false" aria-controls="<?php echo esc_attr( $fahar_filter_panel_id ); ?>" data-fahar-filter-trigger hidden>
 		<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M7 14v6" /></svg>
 		<span><?php echo esc_html( $fahar_filter_label ); ?></span>
 	</button>
@@ -48,7 +48,7 @@ if ( ! $fahar_filter_categories ) {
 		<section id="<?php echo esc_attr( $fahar_filter_panel_id ); ?>" class="fahar-filter-panel" aria-labelledby="<?php echo esc_attr( $fahar_filter_title_id ); ?>" data-fahar-filter-panel>
 			<header class="fahar-filter-panel__header">
 				<h2 id="<?php echo esc_attr( $fahar_filter_title_id ); ?>"><?php esc_html_e( 'فیلتر نمونه‌کارها', 'fahar-theme-child' ); ?></h2>
-				<button class="fahar-filter-close" type="button" aria-label="<?php esc_attr_e( 'بستن فیلترها', 'fahar-theme-child' ); ?>" data-fahar-filter-close hidden>
+				<button class="fahar-button fahar-button--ghost fahar-button--icon fahar-filter-close" type="button" aria-label="<?php esc_attr_e( 'بستن فیلترها', 'fahar-theme-child' ); ?>" data-fahar-filter-close hidden>
 					<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
 				</button>
 			</header>

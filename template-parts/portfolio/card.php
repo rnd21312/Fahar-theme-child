@@ -47,18 +47,19 @@ $fahar_card_is_internal   = $fahar_card_destination['is_internal'];
 $fahar_card_opens_new_tab = $fahar_card_destination['opens_new_tab'];
 
 $fahar_card_cover_id  = fahar_theme_get_portfolio_cover_id( $fahar_card_post );
-$fahar_card_cover_url = fahar_theme_get_portfolio_cover_url( $fahar_card_post, 'large' );
+$fahar_card_cover_url = fahar_theme_get_portfolio_cover_url( $fahar_card_post, 'medium_large' );
 $fahar_card_image     = '';
 
 if ( $fahar_card_cover_id && $fahar_card_cover_url ) {
 	$fahar_card_image = wp_get_attachment_image(
 		$fahar_card_cover_id,
-		'large',
+		'medium_large',
 		false,
 		array(
 			'class'    => 'fahar-portfolio-card__image',
 			'alt'      => '',
 			'decoding' => 'async',
+			'sizes'    => '(min-width: 90rem) 15vw, (min-width: 64rem) 18vw, (min-width: 48rem) 25vw, 50vw',
 		)
 	);
 }

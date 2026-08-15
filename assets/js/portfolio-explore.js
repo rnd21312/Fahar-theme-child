@@ -406,7 +406,7 @@
 
 			const requestUrl = new URL(nextUrl, window.location.href);
 			requestUrl.searchParams.set('fahar_explore_partial', '1');
-			controller = new window.AbortController();
+			controller = 'AbortController' in window ? new window.AbortController() : null;
 			feed.classList.remove('has-error');
 			feed.classList.add('is-loading');
 			setStatus(feed.dataset.loadingMessage || '');
@@ -421,7 +421,7 @@
 				const response = await window.fetch(requestUrl.href, {
 					credentials: 'same-origin',
 					headers: { Accept: 'application/json' },
-					signal: controller.signal,
+					signal: controller ? controller.signal : undefined,
 				});
 
 				if (!response.ok) {
@@ -446,21 +446,32 @@
 					const portfolioId = card.dataset.faharPortfolioId;
 					return card.matches(cardSelector) && portfolioId && !loadedIds.has(portfolioId);
 				});
+				const responseNextUrl = 'string' === typeof payload.next_url ? payload.next_url : '';
+				const responseHasMore = Boolean(payload.has_more && responseNextUrl);
+				let validatedNextUrl = '';
 
-				currentPage = page;
-				feed.dataset.currentPage = String(page);
-				nextUrl = 'string' === typeof payload.next_url ? payload.next_url : '';
-				hasMore = Boolean(payload.has_more && nextUrl);
+				if (responseHasMore) {
+					const parsedNextUrl = new URL(responseNextUrl, window.location.href);
+					const exploreUrl = new URL(initialLocation);
+					const stateKeys = ['portfolio_search', 'portfolio_category', 'portfolio_tag'];
+					const hasMatchingState = stateKeys.every((key) => parsedNextUrl.searchParams.get(key) === exploreUrl.searchParams.get(key));
 
-				if (hasMore) {
-					const parsedNextUrl = new URL(nextUrl, window.location.href);
-
-					if (parsedNextUrl.origin !== window.location.origin) {
+					if (
+						parsedNextUrl.origin !== window.location.origin
+						|| parsedNextUrl.pathname.replace(/\/+$/, '') !== exploreUrl.pathname.replace(/\/+$/, '')
+						|| !hasMatchingState
+						|| Number.parseInt(parsedNextUrl.searchParams.get('portfolio_page') || '', 10) !== page + 1
+					) {
 						throw new Error('Invalid Explore next URL');
 					}
 
-					nextUrl = parsedNextUrl.href;
+					validatedNextUrl = parsedNextUrl.href;
 				}
+
+				currentPage = page;
+				feed.dataset.currentPage = String(page);
+				nextUrl = validatedNextUrl;
+				hasMore = responseHasMore;
 
 				if (cards.length) {
 					registerPageCards(cards, page);
@@ -576,6 +587,7 @@
 		const listbox = root.querySelector('[data-fahar-search-listbox]');
 		const status = root.querySelector('[data-fahar-search-status]');
 		const endpoint = root.dataset.endpoint;
+		const errorMessage = root.dataset.errorMessage;
 
 		if (!input || !listbox || !status || !endpoint) {
 			return;
@@ -738,7 +750,7 @@
 
 				if (sequence === requestSequence) {
 					closeList();
-					setStatus(root.dataset.emptyMessage || '');
+					setStatus(errorMessage || '');
 				}
 			}
 		};
@@ -770,7 +782,7 @@
 			} else if ('Enter' === event.key && 0 <= activeIndex && options[activeIndex]) {
 				event.preventDefault();
 				window.location.assign(options[activeIndex].href);
-			} else if ('Escape' === event.key) {
+			} else if ('Escape' === event.key && (!listbox.hidden || status.textContent)) {
 				event.preventDefault();
 				requestSequence += 1;
 				if (controller) {
@@ -791,6 +803,20 @@
 					closeList();
 				}
 			}, 0);
+		});
+
+		document.addEventListener('pointerdown', (event) => {
+			if (!(event.target instanceof Node) || root.contains(event.target)) {
+				return;
+			}
+
+			window.clearTimeout(debounceTimer);
+			requestSequence += 1;
+			if (controller) {
+				controller.abort();
+			}
+			closeList();
+			setStatus();
 		});
 
 		root.addEventListener('submit', () => {
@@ -818,15 +844,15 @@
 			.filter((element) => !element.hidden && element.getClientRects().length > 0);
 
 		const syncOpenState = () => {
-			const isOpen = mobileQuery.matches && disclosure.open;
+			const isOpen = disclosure.open;
 
 			trigger.setAttribute('aria-expanded', String(isOpen));
 			root.classList.toggle('is-open', isOpen);
-			document.body.classList.toggle('fahar-filter-surface-open', isOpen);
+			document.body.classList.toggle('fahar-filter-surface-open', mobileQuery.matches && isOpen);
 		};
 
 		const closePanel = (restoreFocus = true) => {
-			if (!mobileQuery.matches || !disclosure.open) {
+			if (!disclosure.open) {
 				return;
 			}
 
@@ -839,19 +865,18 @@
 		};
 
 		const openPanel = () => {
-			if (!mobileQuery.matches || disclosure.open) {
+			if (disclosure.open) {
 				return;
 			}
 
 			disclosure.open = true;
 			syncOpenState();
-			window.requestAnimationFrame(() => closeButton.focus({ preventScroll: true }));
+			if (mobileQuery.matches) {
+				window.requestAnimationFrame(() => closeButton.focus({ preventScroll: true }));
+			}
 		};
 
 		trigger.addEventListener('click', () => {
-			if (!mobileQuery.matches) {
-				return;
-			}
 			if (disclosure.open) {
 				closePanel();
 			} else {
@@ -867,13 +892,20 @@
 		}
 		disclosure.addEventListener('toggle', syncOpenState);
 
-		panel.addEventListener('keydown', (event) => {
-			if (mobileQuery.matches && 'Escape' === event.key) {
+		document.addEventListener('pointerdown', (event) => {
+			if (disclosure.open && event.target instanceof Node && !root.contains(event.target)) {
+				closePanel(false);
+			}
+		});
+
+		root.addEventListener('keydown', (event) => {
+			if ('Escape' === event.key && disclosure.open) {
 				event.preventDefault();
 				closePanel();
-				return;
 			}
+		});
 
+		panel.addEventListener('keydown', (event) => {
 			if (!mobileQuery.matches || 'Tab' !== event.key) {
 				return;
 			}
@@ -899,23 +931,26 @@
 		});
 
 		const configureViewport = () => {
+			const restoreTriggerFocus = disclosure.open && panel.contains(document.activeElement);
+			disclosure.open = false;
+			trigger.hidden = false;
+			closeButton.hidden = false;
+
 			if (mobileQuery.matches) {
-				disclosure.open = false;
-				trigger.hidden = false;
-				closeButton.hidden = false;
 				panel.setAttribute('role', 'dialog');
 				panel.setAttribute('aria-modal', 'true');
 				panel.setAttribute('tabindex', '-1');
 			} else {
-				disclosure.open = true;
-				trigger.hidden = true;
-				closeButton.hidden = true;
 				panel.removeAttribute('role');
 				panel.removeAttribute('aria-modal');
 				panel.removeAttribute('tabindex');
 			}
 
 			syncOpenState();
+
+			if (restoreTriggerFocus) {
+				trigger.focus({ preventScroll: true });
+			}
 		};
 
 		if (typeof mobileQuery.addEventListener === 'function') {

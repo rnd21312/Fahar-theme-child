@@ -223,8 +223,9 @@ get_header();
 						data-endpoint="<?php echo esc_url( rest_url( 'fahar/v1/portfolio-suggestions' ) ); ?>"
 						data-loading-message="<?php esc_attr_e( 'در حال جستجو…', 'fahar-theme-child' ); ?>"
 						data-empty-message="<?php esc_attr_e( 'نتیجه‌ای پیدا نشد', 'fahar-theme-child' ); ?>"
+						data-error-message="<?php esc_attr_e( 'پیشنهادها در دسترس نیستند؛ جستجوی معمولی همچنان کار می‌کند.', 'fahar-theme-child' ); ?>"
 					>
-						<label class="fahar-filter-group__legend" for="fahar-explore-search-input">
+						<label class="screen-reader-text" for="fahar-explore-search-input">
 							<?php esc_html_e( 'جستجو', 'fahar-theme-child' ); ?>
 						</label>
 						<div class="fahar-explore-search__field">
@@ -257,21 +258,6 @@ get_header();
 						<ul id="<?php echo esc_attr( $fahar_search_listbox_id ); ?>" class="fahar-search-suggestions" role="listbox" data-fahar-search-listbox hidden></ul>
 					</form>
 
-					<?php if ( '' !== $fahar_search_term ) : ?>
-						<div class="fahar-explore-search__context">
-							<p>
-								<?php
-								printf(
-									/* translators: %s: current portfolio search phrase. */
-									esc_html__( 'نتایج برای «%s»', 'fahar-theme-child' ),
-									esc_html( $fahar_search_term )
-								);
-								?>
-							</p>
-							<a class="fahar-explore-search__clear" href="<?php echo esc_url( $fahar_search_clear_url ); ?>"><?php esc_html_e( 'پاک‌کردن جستجو', 'fahar-theme-child' ); ?></a>
-						</div>
-					<?php endif; ?>
-
 					<?php
 					get_template_part(
 						'template-parts/portfolio/filters',
@@ -291,6 +277,38 @@ get_header();
 				</div>
 			</aside>
 
+			<?php if ( '' !== $fahar_search_term || $fahar_has_filters ) : ?>
+				<div class="fahar-explore-active" aria-label="<?php esc_attr_e( 'زمینه فعال کاوش', 'fahar-theme-child' ); ?>">
+					<div class="fahar-explore-active__items">
+						<?php if ( '' !== $fahar_search_term ) : ?>
+							<span class="fahar-explore-active__item">
+								<?php
+								printf(
+									/* translators: %s: current portfolio search phrase. */
+									esc_html__( 'جستجو: «%s»', 'fahar-theme-child' ),
+									esc_html( $fahar_search_term )
+								);
+								?>
+							</span>
+						<?php endif; ?>
+						<?php if ( $fahar_selected_category instanceof WP_Term ) : ?>
+							<span class="fahar-explore-active__item"><?php echo esc_html( $fahar_selected_category->name ); ?></span>
+						<?php endif; ?>
+						<?php if ( $fahar_selected_tag instanceof WP_Term ) : ?>
+							<span class="fahar-explore-active__item"><?php echo esc_html( $fahar_selected_tag->name ); ?></span>
+						<?php endif; ?>
+					</div>
+					<div class="fahar-explore-active__actions">
+						<?php if ( '' !== $fahar_search_term ) : ?>
+							<a class="fahar-explore-search__clear" href="<?php echo esc_url( $fahar_search_clear_url ); ?>"><?php esc_html_e( 'پاک‌کردن جستجو', 'fahar-theme-child' ); ?></a>
+						<?php endif; ?>
+						<?php if ( $fahar_has_filters ) : ?>
+							<a class="fahar-filter-reset" href="<?php echo esc_url( $fahar_filter_reset_url ); ?>"><?php esc_html_e( 'پاک‌کردن فیلترها', 'fahar-theme-child' ); ?></a>
+						<?php endif; ?>
+					</div>
+				</div>
+			<?php endif; ?>
+
 			<section class="fahar-explore__results" aria-labelledby="fahar-explore-results-title">
 				<h2 id="fahar-explore-results-title" class="screen-reader-text"><?php esc_html_e( 'نتایج نمونه‌کارها', 'fahar-theme-child' ); ?></h2>
 
@@ -304,13 +322,13 @@ get_header();
 							<div class="fahar-explore-load" data-fahar-load-controls>
 								<span class="fahar-explore-load__spinner" data-fahar-load-spinner aria-hidden="true"></span>
 								<p class="fahar-explore-load__status" data-fahar-load-status aria-live="polite" aria-atomic="true"></p>
-								<a class="fahar-button fahar-explore-load__link" href="<?php echo esc_url( $fahar_explore_next_url ); ?>" data-fahar-load-more><?php esc_html_e( 'نمایش بیشتر', 'fahar-theme-child' ); ?></a>
+								<a class="fahar-button fahar-button--secondary fahar-explore-load__link" href="<?php echo esc_url( $fahar_explore_next_url ); ?>" data-fahar-load-more><?php esc_html_e( 'نمایش بیشتر', 'fahar-theme-child' ); ?></a>
 							</div>
 						<?php endif; ?>
 					</div>
 					<?php wp_reset_postdata(); ?>
 				<?php else : ?>
-					<?php get_template_part( 'template-parts/portfolio/empty-state', null, array( 'search_term' => $fahar_search_term, 'has_filters' => $fahar_has_filters ) ); ?>
+					<?php get_template_part( 'template-parts/portfolio/empty-state', null, array( 'search_term' => $fahar_search_term, 'has_filters' => $fahar_has_filters, 'reset_url' => $fahar_explore_url ) ); ?>
 				<?php endif; ?>
 			</section>
 		</div>
