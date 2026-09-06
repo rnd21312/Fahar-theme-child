@@ -767,6 +767,125 @@ function fahar_theme_get_explore_filter_taxonomy( $role ) {
 }
 
 /**
+ * Return a representative image attachment for a portfolio category.
+ *
+ * Taxonomy-image plugins may store a local attachment ID in term meta. When
+ * none is available, the newest published portfolio cover supplies the card
+ * image without introducing a separate category-media system.
+ *
+ * @param WP_Term|int $category Portfolio category term or term ID.
+ * @return int
+ */
+function fahar_theme_get_portfolio_category_image_id( $category ) {
+	$taxonomy  = fahar_theme_get_explore_filter_taxonomy( 'category' );
+	$post_type = fahar_theme_get_portfolio_post_type();
+	$category  = $category instanceof WP_Term
+		? $category
+		: ( $taxonomy ? get_term( absint( $category ), $taxonomy ) : null );
+
+	if ( ! $category instanceof WP_Term || $taxonomy !== $category->taxonomy || ! $post_type ) {
+		return 0;
+	}
+
+	static $image_ids             = array();
+	static $fallback_image_ids    = null;
+
+	if ( isset( $image_ids[ $category->term_id ] ) ) {
+		return $image_ids[ $category->term_id ];
+	}
+
+	$meta_keys = (array) apply_filters(
+		'fahar_theme_portfolio_category_image_meta_keys',
+		array( 'thumbnail_id', 'image_id', 'category_image_id', 'category-image-id', 'taxonomy_image_id', 'category_image', 'image' ),
+		$category
+	);
+	$image_id = 0;
+
+	foreach ( array_filter( array_map( 'sanitize_key', $meta_keys ) ) as $meta_key ) {
+		$image_id = fahar_theme_normalize_image_attachment_id( get_term_meta( $category->term_id, $meta_key, true ) );
+
+		if ( $image_id ) {
+			break;
+		}
+	}
+
+	if ( ! $image_id ) {
+		if ( null === $fallback_image_ids ) {
+			$fallback_image_ids = array();
+			$post_limit          = absint( apply_filters( 'fahar_theme_category_image_post_limit', 250 ) );
+			$post_limit          = min( 1000, max( 100, $post_limit ) );
+			$query               = fahar_theme_query_portfolios(
+				array(
+					'post_type'              => $post_type,
+					'post_status'            => 'publish',
+					'posts_per_page'         => $post_limit,
+					'fields'                 => 'ids',
+					'orderby'                => array( 'date' => 'DESC', 'ID' => 'DESC' ),
+					'no_found_rows'          => true,
+					'ignore_sticky_posts'    => true,
+					'update_post_meta_cache' => true,
+					'update_post_term_cache' => true,
+				)
+			);
+
+			foreach ( $query->posts as $portfolio_id ) {
+				$cover_id = fahar_theme_get_portfolio_cover_id( $portfolio_id );
+				$terms    = $cover_id ? get_the_terms( $portfolio_id, $taxonomy ) : array();
+
+				if ( ! $cover_id || is_wp_error( $terms ) || ! $terms ) {
+					continue;
+				}
+
+				foreach ( $terms as $term ) {
+					$term_path   = get_ancestors( $term->term_id, $taxonomy, 'taxonomy' );
+					$term_path[] = $term->term_id;
+
+					foreach ( array_map( 'absint', $term_path ) as $term_id ) {
+						if ( ! isset( $fallback_image_ids[ $term_id ] ) ) {
+							$fallback_image_ids[ $term_id ] = $cover_id;
+						}
+					}
+				}
+			}
+		}
+
+		$image_id = isset( $fallback_image_ids[ $category->term_id ] ) ? $fallback_image_ids[ $category->term_id ] : 0;
+
+		if ( ! $image_id ) {
+			$query = fahar_theme_query_portfolios(
+				array(
+					'post_type'              => $post_type,
+					'post_status'            => 'publish',
+					'posts_per_page'         => 1,
+					'fields'                 => 'ids',
+					'orderby'                => array( 'date' => 'DESC', 'ID' => 'DESC' ),
+					'no_found_rows'          => true,
+					'ignore_sticky_posts'    => true,
+					'update_post_meta_cache' => true,
+					'update_post_term_cache' => false,
+					'tax_query'              => array(
+						array(
+							'taxonomy'         => $taxonomy,
+							'field'            => 'term_id',
+							'terms'            => array( $category->term_id ),
+							'include_children' => true,
+						),
+					),
+				)
+			);
+			$image_id = $query->posts ? fahar_theme_get_portfolio_cover_id( $query->posts[0] ) : 0;
+		}
+	}
+
+	$image_id = fahar_theme_normalize_image_attachment_id(
+		apply_filters( 'fahar_theme_portfolio_category_image_id', $image_id, $category )
+	);
+	$image_ids[ $category->term_id ] = $image_id;
+
+	return $image_id;
+}
+
+/**
  * Return public portfolio tags used by published items in one category.
  *
  * The bounded object query avoids exposing the global tag universe and keeps

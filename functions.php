@@ -25,6 +25,7 @@ $fahar_theme_modules = array(
 	'navigation',
 	'assets',
 	'performance',
+	'updater/bootstrap',
 );
 
 foreach ( $fahar_theme_modules as $fahar_theme_module ) {

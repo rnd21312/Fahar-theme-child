@@ -2,6 +2,10 @@
 
 All notable changes to Fahar Theme Child are documented here.
 
+## 1.2.1 - 2026-09-06
+
+- Added hover motion to portfolio cards (lift, image zoom, elevated shadow, gold title accent) using existing Fahar tokens, with a `prefers-reduced-motion` fallback.
+
 ## 1.0.0 - 2026-08-08
 
 - Renamed and normalized the Hello Elementor child-theme metadata for Fahar.

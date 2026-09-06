@@ -94,15 +94,65 @@ $fahar_state_base_args  = '' !== $fahar_search_term ? array( 'portfolio_search' 
 $fahar_category_links       = array();
 $fahar_all_categories_url = $fahar_state_base_args ? add_query_arg( $fahar_state_base_args, $fahar_explore_url ) : $fahar_explore_url;
 
+$fahar_category_term_index = array();
+$fahar_category_children   = array();
+$fahar_selected_path       = array();
+
 foreach ( $fahar_category_terms as $fahar_category_term ) {
-	$fahar_category_args                       = $fahar_state_base_args;
-	$fahar_category_args['portfolio_category'] = $fahar_category_term->slug;
-	$fahar_category_links[]                    = array(
-		'label'    => $fahar_category_term->name,
-		'slug'     => $fahar_category_term->slug,
-		'url'      => add_query_arg( $fahar_category_args, $fahar_explore_url ),
-		'selected' => $fahar_selected_category instanceof WP_Term && $fahar_selected_category->term_id === $fahar_category_term->term_id,
-	);
+	$fahar_category_term_index[ $fahar_category_term->term_id ] = $fahar_category_term;
+}
+
+foreach ( $fahar_category_terms as $fahar_category_term ) {
+	$fahar_category_parent = isset( $fahar_category_term_index[ $fahar_category_term->parent ] )
+		? $fahar_category_term->parent
+		: 0;
+	$fahar_category_children[ $fahar_category_parent ][] = $fahar_category_term;
+}
+
+if ( $fahar_selected_category instanceof WP_Term ) {
+	$fahar_selected_path   = get_ancestors( $fahar_selected_category->term_id, $fahar_category_taxonomy, 'taxonomy' );
+	$fahar_selected_path[] = $fahar_selected_category->term_id;
+	$fahar_selected_path   = array_map( 'absint', $fahar_selected_path );
+}
+
+$fahar_build_category_links = static function ( $parent_id ) use ( &$fahar_build_category_links, $fahar_category_children, $fahar_explore_url, $fahar_selected_category, $fahar_selected_path, $fahar_state_base_args ) {
+	$links = array();
+
+	foreach ( isset( $fahar_category_children[ $parent_id ] ) ? $fahar_category_children[ $parent_id ] : array() as $category_term ) {
+		$category_args                       = $fahar_state_base_args;
+		$category_args['portfolio_category'] = $category_term->slug;
+		$links[]                             = array(
+			'id'       => $category_term->term_id,
+			'image_id' => 0 === $parent_id ? fahar_theme_get_portfolio_category_image_id( $category_term ) : 0,
+			'label'    => $category_term->name,
+			'slug'     => $category_term->slug,
+			'url'      => add_query_arg( $category_args, $fahar_explore_url ),
+			'selected' => $fahar_selected_category instanceof WP_Term && $fahar_selected_category->term_id === $category_term->term_id,
+			'expanded' => in_array( $category_term->term_id, $fahar_selected_path, true ),
+			'children' => $fahar_build_category_links( $category_term->term_id ),
+		);
+	}
+
+	return $links;
+};
+
+$fahar_category_links = $fahar_build_category_links( 0 );
+$fahar_subcategory_links = array();
+
+if ( $fahar_selected_category instanceof WP_Term ) {
+	$fahar_subcategory_parent_id = ! empty( $fahar_category_children[ $fahar_selected_category->term_id ] )
+		? $fahar_selected_category->term_id
+		: $fahar_selected_category->parent;
+
+	foreach ( isset( $fahar_category_children[ $fahar_subcategory_parent_id ] ) ? $fahar_category_children[ $fahar_subcategory_parent_id ] : array() as $fahar_subcategory_term ) {
+		$fahar_subcategory_args                       = $fahar_state_base_args;
+		$fahar_subcategory_args['portfolio_category'] = $fahar_subcategory_term->slug;
+		$fahar_subcategory_links[]                    = array(
+			'label'    => $fahar_subcategory_term->name,
+			'url'      => add_query_arg( $fahar_subcategory_args, $fahar_explore_url ),
+			'selected' => $fahar_selected_category->term_id === $fahar_subcategory_term->term_id,
+		);
+	}
 }
 
 $fahar_tag_links    = array();
@@ -207,13 +257,14 @@ get_header();
 ?>
 <div class="fahar-app-shell fahar-explore">
 	<main id="content" class="fahar-main fahar-page fahar-container fahar-container--wide" data-fahar-explore>
-		<header class="fahar-explore__header">
-			<h1 class="fahar-explore__title"><?php echo esc_html( $fahar_explore_title ); ?></h1>
-		</header>
+		<h1 class="fahar-screen-reader-text"><?php echo esc_html( $fahar_explore_title ); ?></h1>
 
 		<div class="fahar-explore__layout">
 			<aside class="fahar-explore__sidebar" aria-label="<?php esc_attr_e( 'جستجو و فیلتر نمونه‌کارها', 'fahar-theme-child' ); ?>">
-				<div class="fahar-explore__sidebar-inner">
+				<button class="fahar-button fahar-button--ghost fahar-button--icon fahar-explore__sidebar-toggle" type="button" aria-expanded="true" aria-controls="fahar-explore-sidebar-content" aria-label="<?php esc_attr_e( 'بستن نوار کناری', 'fahar-theme-child' ); ?>" data-expand-label="<?php esc_attr_e( 'بازکردن نوار کناری', 'fahar-theme-child' ); ?>" data-collapse-label="<?php esc_attr_e( 'بستن نوار کناری', 'fahar-theme-child' ); ?>" data-fahar-sidebar-toggle hidden>
+					<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" /><path d="M9 3v18" /></svg>
+				</button>
+				<div id="fahar-explore-sidebar-content" class="fahar-explore__sidebar-inner" data-fahar-sidebar-content>
 					<form
 						class="fahar-explore-search"
 						role="search"
@@ -285,6 +336,18 @@ get_header();
 			<section class="fahar-explore__results" aria-labelledby="fahar-explore-results-title">
 				<h2 id="fahar-explore-results-title" class="screen-reader-text"><?php esc_html_e( 'نتایج نمونه‌کارها', 'fahar-theme-child' ); ?></h2>
 
+				<?php if ( $fahar_subcategory_links ) : ?>
+					<nav class="fahar-explore__subcategories" aria-label="<?php esc_attr_e( 'زیرمجموعه‌های دسته‌بندی', 'fahar-theme-child' ); ?>">
+						<ul>
+							<?php foreach ( $fahar_subcategory_links as $fahar_subcategory_link ) : ?>
+								<li>
+									<a href="<?php echo esc_url( $fahar_subcategory_link['url'] ); ?>"<?php if ( $fahar_subcategory_link['selected'] ) : ?> aria-current="page"<?php endif; ?>><?php echo esc_html( $fahar_subcategory_link['label'] ); ?></a>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</nav>
+				<?php endif; ?>
+
 				<?php if ( $fahar_explore_query instanceof WP_Query && $fahar_explore_query->have_posts() ) : ?>
 					<div class="fahar-explore__feed" data-fahar-infinite-feed data-current-page="<?php echo esc_attr( $fahar_explore_page ); ?>" data-loading-message="<?php esc_attr_e( 'در حال بارگذاری نمونه‌کارهای بیشتر', 'fahar-theme-child' ); ?>" data-loaded-message="<?php esc_attr_e( '%d نمونه‌کار دیگر بارگذاری شد.', 'fahar-theme-child' ); ?>" data-error-message="<?php esc_attr_e( 'نمونه‌کارهای بیشتر بارگذاری نشد. دوباره تلاش کنید.', 'fahar-theme-child' ); ?>" data-end-message="<?php esc_attr_e( 'به پایان نمونه‌کارها رسیدید.', 'fahar-theme-child' ); ?>" data-retry-label="<?php esc_attr_e( 'تلاش دوباره', 'fahar-theme-child' ); ?>">
 						<div class="fahar-explore__grid" data-fahar-masonry>
@@ -334,6 +397,16 @@ unset(
 	$fahar_active_count,
 	$fahar_state_base_args,
 	$fahar_category_links,
+	$fahar_category_term_index,
+	$fahar_category_children,
+	$fahar_category_parent,
+	$fahar_selected_path,
+	$fahar_build_category_links,
+	$fahar_subcategory_links,
+	$fahar_subcategory_parent_id,
+	$fahar_subcategory_term,
+	$fahar_subcategory_args,
+	$fahar_subcategory_link,
 	$fahar_all_categories_url,
 	$fahar_tag_links,
 	$fahar_all_tags_url,

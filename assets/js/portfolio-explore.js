@@ -644,6 +644,26 @@
 		const getFocusableElements = () => Array.from(panel.querySelectorAll(focusableSelector))
 			.filter((element) => !element.hidden && element.getClientRects().length > 0);
 
+		root.querySelectorAll('[data-fahar-category-toggle]').forEach((categoryToggle) => {
+			const controlledId = categoryToggle.getAttribute('aria-controls');
+			const categoryList = controlledId ? document.getElementById(controlledId) : null;
+
+			if (!categoryList || !panel.contains(categoryList)) {
+				return;
+			}
+
+			const setCategoryExpanded = (expanded) => {
+				categoryToggle.setAttribute('aria-expanded', String(expanded));
+				categoryToggle.setAttribute('aria-label', expanded ? categoryToggle.dataset.collapseLabel : categoryToggle.dataset.expandLabel);
+				categoryList.hidden = !expanded;
+			};
+
+			setCategoryExpanded('true' === categoryToggle.getAttribute('aria-expanded'));
+			categoryToggle.addEventListener('click', () => {
+				setCategoryExpanded('true' !== categoryToggle.getAttribute('aria-expanded'));
+			});
+		});
+
 		const syncOpenState = () => {
 			const isOpen = disclosure.open;
 
@@ -770,6 +790,43 @@
 		configureViewport();
 	};
 
+	const initializeExploreSidebar = (explore) => {
+		const sidebar = explore.querySelector('.fahar-explore__sidebar');
+		const toggle = sidebar ? sidebar.querySelector('[data-fahar-sidebar-toggle]') : null;
+		const content = sidebar ? sidebar.querySelector('[data-fahar-sidebar-content]') : null;
+
+		if (!sidebar || !toggle || !content) {
+			return;
+		}
+
+		const desktopQuery = window.matchMedia('(min-width: 64rem)');
+		let expanded = true;
+
+		const setExpanded = (nextExpanded) => {
+			expanded = nextExpanded;
+			const isDesktop = desktopQuery.matches;
+			const isExpanded = !isDesktop || expanded;
+
+			toggle.hidden = !isDesktop;
+			toggle.setAttribute('aria-expanded', String(isExpanded));
+			toggle.setAttribute('aria-label', isExpanded ? toggle.dataset.collapseLabel : toggle.dataset.expandLabel);
+			content.hidden = !isExpanded;
+			explore.classList.toggle('is-sidebar-collapsed', isDesktop && !isExpanded);
+		};
+
+		toggle.addEventListener('click', () => setExpanded(!expanded));
+
+		const configureViewport = () => setExpanded(desktopQuery.matches ? expanded : true);
+
+		if (typeof desktopQuery.addEventListener === 'function') {
+			desktopQuery.addEventListener('change', configureViewport);
+		} else if (typeof desktopQuery.addListener === 'function') {
+			desktopQuery.addListener(configureViewport);
+		}
+
+		configureViewport();
+	};
+
 	const initialize = () => {
 		document.querySelectorAll(gridSelector).forEach(initializeGrid);
 		document.querySelectorAll(filterRootSelector).forEach(initializeFilterSurface);
@@ -778,6 +835,7 @@
 		const explore = document.querySelector(exploreSelector);
 
 		if (explore) {
+			initializeExploreSidebar(explore);
 			initializeInfiniteFeed(explore);
 		}
 	};

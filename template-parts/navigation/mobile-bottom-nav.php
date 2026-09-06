@@ -48,6 +48,7 @@ if ( ! $fahar_has_mobile_menu && empty( $fahar_navigation_items ) ) {
 					<li class="fahar-mobile-nav__item">
 						<a class="fahar-mobile-nav__link" href="<?php echo esc_url( $url ); ?>" aria-label="<?php echo esc_attr( $label ); ?>"<?php if ( $active ) : ?> aria-current="page"<?php endif; ?>>
 							<?php echo fahar_theme_get_mobile_navigation_icon_markup( $icon ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Markup comes from a fixed internal allowlist. ?>
+							<span class="fahar-mobile-nav__label"><?php echo esc_html( $label ); ?></span>
 						</a>
 					</li>
 				<?php endforeach; ?>
