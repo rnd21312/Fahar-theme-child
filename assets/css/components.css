@@ -168,3 +168,33 @@
 	border: 0;
 	background-color: var(--fahar-color-border-subtle);
 }
+
+/**
+ * The site header's search trigger is built as an Elementor header widget
+ * (not a template in this repo), so its markup can't be edited here. Its
+ * near-black badge had no visible edge against the equally dark header,
+ * reading as a flat black circle. This overrides only its color surface
+ * to match the token system, using the search action as one of the few
+ * intentional Desert Gold accent moments.
+ */
+.ajax-search-f-icon {
+	background-color: var(--fahar-color-surface-elevated);
+	border: 1px solid color-mix(in srgb, var(--fahar-color-accent) 35%, var(--fahar-color-border-strong));
+	transition:
+		background-color var(--fahar-motion-fast) var(--fahar-ease-standard),
+		border-color var(--fahar-motion-fast) var(--fahar-ease-standard);
+}
+
+.ajax-search-f-icon .search-svg {
+	stroke: var(--fahar-color-text);
+	transition: stroke var(--fahar-motion-fast) var(--fahar-ease-standard);
+}
+
+.ajax-search-f-icon:hover {
+	background-color: var(--fahar-color-surface-active);
+	border-color: var(--fahar-color-accent);
+}
+
+.ajax-search-f-icon:hover .search-svg {
+	stroke: var(--fahar-color-accent);
+}

@@ -9,11 +9,12 @@
 .fahar-portfolio-card__link {
 	display: grid;
 	gap: var(--fahar-space-2);
-	border-radius: var(--fahar-radius-lg);
+	border-radius: var(--fahar-radius-md);
 	color: var(--fahar-color-text-primary);
 	text-align: start;
 	text-decoration: none;
 	touch-action: manipulation;
+	transition: transform var(--fahar-motion-normal) var(--fahar-ease-standard);
 }
 
 .fahar-portfolio-card__link:hover {
@@ -28,9 +29,10 @@
 
 .fahar-portfolio-card__media {
 	position: relative;
-	border-radius: var(--fahar-radius-lg);
+	border-radius: var(--fahar-radius-md);
 	background-color: var(--fahar-color-surface-2);
 	overflow: hidden;
+	transition: box-shadow var(--fahar-motion-normal) var(--fahar-ease-standard);
 }
 
 .fahar-portfolio-card__media::after {
@@ -40,13 +42,15 @@
 	background-color: var(--fahar-color-background);
 	opacity: 0;
 	pointer-events: none;
-	transition: opacity var(--fahar-motion-normal) var(--fahar-ease-standard);
+	transition: opacity var(--fahar-motion-fast) var(--fahar-ease-standard);
 }
 
 .fahar-portfolio-card__image {
 	display: block;
 	inline-size: 100%;
 	block-size: auto;
+	transition: transform var(--fahar-motion-slow) var(--fahar-ease-standard);
+	will-change: transform;
 }
 
 .fahar-portfolio-card__placeholder {
@@ -63,12 +67,13 @@
 .fahar-portfolio-card__play {
 	position: absolute;
 	z-index: 1;
-	inset-block-end: var(--fahar-space-2);
-	inset-inline-end: var(--fahar-space-2);
+	inset-block: 0;
+	inset-inline: 0;
 	display: grid;
 	place-items: center;
-	inline-size: 2rem;
-	block-size: 2rem;
+	inline-size: 2.5rem;
+	block-size: 2.5rem;
+	margin: auto;
 	border: 1px solid var(--fahar-color-border-strong);
 	border-radius: var(--fahar-radius-round);
 	background-color: var(--fahar-color-media-overlay);
@@ -93,7 +98,7 @@
 	color: var(--fahar-color-text-primary);
 	font-size: var(--fahar-text-body-sm);
 	font-weight: var(--fahar-weight-semibold);
-	line-height: var(--fahar-line-height-body);
+	line-height: 1.6;
 	overflow-wrap: anywhere;
 	overflow: hidden;
 	-webkit-box-orient: vertical;
@@ -103,8 +108,8 @@
 
 .fahar-portfolio-card__meta {
 	margin-block-start: var(--fahar-space-1);
-	color: var(--fahar-color-text-muted);
-	font-size: var(--fahar-text-meta);
+	color: var(--fahar-color-text-secondary);
+	font-size: var(--fahar-text-body-sm);
 	line-height: var(--fahar-line-height-heading);
 	overflow-wrap: anywhere;
 }
@@ -119,11 +124,39 @@ a.fahar-portfolio-card__link:active .fahar-portfolio-card__media::after {
 		opacity: 0.16;
 	}
 
+	a.fahar-portfolio-card__link:hover,
+	a.fahar-portfolio-card__link:focus-visible {
+		transform: translateY(-0.25rem);
+	}
+
+	a.fahar-portfolio-card__link:hover .fahar-portfolio-card__media,
+	a.fahar-portfolio-card__link:focus-visible .fahar-portfolio-card__media {
+		box-shadow: var(--fahar-shadow-elevated);
+	}
+
+	a.fahar-portfolio-card__link:hover .fahar-portfolio-card__image,
+	a.fahar-portfolio-card__link:focus-visible .fahar-portfolio-card__image {
+		transform: scale(1.06);
+	}
+
 }
 
 @media (prefers-reduced-motion: reduce) {
+	.fahar-portfolio-card__link,
+	.fahar-portfolio-card__media,
 	.fahar-portfolio-card__media::after,
+	.fahar-portfolio-card__image,
 	.fahar-portfolio-card__title {
 		transition: none;
+	}
+
+	a.fahar-portfolio-card__link:hover,
+	a.fahar-portfolio-card__link:focus-visible {
+		transform: none;
+	}
+
+	a.fahar-portfolio-card__link:hover .fahar-portfolio-card__image,
+	a.fahar-portfolio-card__link:focus-visible .fahar-portfolio-card__image {
+		transform: none;
 	}
 }

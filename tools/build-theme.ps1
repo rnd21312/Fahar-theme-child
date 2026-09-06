@@ -2,7 +2,8 @@
 param(
     [switch] $Clean,
     [string] $OutputDirectory = 'build',
-    [string] $ThemeDirectoryName = 'fahar-theme-child'
+    [string] $ThemeDirectoryName = 'fahar-theme-child',
+    [string] $ArchiveName = ''
 )
 
 Set-StrictMode -Version Latest
@@ -155,7 +156,16 @@ try {
         Get-ChildItem -LiteralPath $outputPath -Force | Remove-Item -Recurse -Force
     }
     [IO.Directory]::CreateDirectory($outputPath) | Out-Null
-    $finalArchivePath = Join-Path $outputPath "$artifactSlug-$version.zip"
+    if ([string]::IsNullOrWhiteSpace($ArchiveName)) {
+        $resolvedArchiveName = "$artifactSlug-$version.zip"
+    } else {
+        $resolvedArchiveName = $ArchiveName.Trim()
+        if ([IO.Path]::GetFileName($resolvedArchiveName) -cne $resolvedArchiveName -or
+            [IO.Path]::GetExtension($resolvedArchiveName) -ine '.zip') {
+            throw "ArchiveName must be one ZIP filename: '$ArchiveName'"
+        }
+    }
+    $finalArchivePath = Join-Path $outputPath $resolvedArchiveName
     $temporaryArchivePath = Join-Path $outputPath ('.{0}-{1}-{2}.tmp' -f $artifactSlug, $version, [guid]::NewGuid().ToString('N'))
 
     $sourceFiles = @(

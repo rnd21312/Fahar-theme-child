@@ -62,3 +62,16 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\build-theme.ps1
 PowerShell 7 users may alternatively run `pwsh -NoProfile -File .\tools\build-theme.ps1`.
 
 The original upstream `readme.txt` is retained for provenance; this file is the active project documentation.
+
+## GitHub releases and automatic updates
+
+The active theme checks the latest stable release from `rnd21312/Fahar-theme-child` through the GitHub Releases API and supplies a validated `fahartheme.zip` asset to WordPress's native theme updater. Release data is cached in the `fahar_theme_github_release` network transient for 12 hours; failures are cached for one hour. Developers can clear it with `wp transient delete --network fahar_theme_github_release` or `do_action( 'fahar_theme_clear_updater_cache' );`.
+
+Keep the `Version:` header in `style.css` synchronized with the release tag, then publish a release by pushing the tag:
+
+```bash
+git tag v1.3.0
+git push origin v1.3.0
+```
+
+The release workflow validates the tag/version pair, builds `fahartheme.zip` with `fahar-theme-child/` as its install-safe root, verifies the archive structure, and creates or updates the GitHub Release using `GITHUB_TOKEN`.

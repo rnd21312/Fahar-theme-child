@@ -20,6 +20,7 @@ $fahar_filter_active_count       = isset( $args['active_count'] ) ? absint( $arg
 $fahar_filter_instance           = wp_unique_id( 'fahar-portfolio-filters-' );
 $fahar_filter_panel_id           = $fahar_filter_instance . '-panel';
 $fahar_filter_title_id           = $fahar_filter_instance . '-title';
+$fahar_filter_body_id            = $fahar_filter_instance . '-body';
 $fahar_filter_label              = $fahar_filter_active_count
 	? sprintf(
 		/* translators: %s: number of active filters. */
@@ -31,16 +32,46 @@ $fahar_filter_label              = $fahar_filter_active_count
 if ( ! $fahar_filter_categories ) {
 	return;
 }
+
+$fahar_render_category_options = static function ( $categories, $instance, $depth = 0, $list_id = '' ) use ( &$fahar_render_category_options ) {
+	if ( ! $categories ) {
+		return;
+	}
+	?>
+	<ul<?php echo $list_id ? ' id="' . esc_attr( $list_id ) . '"' : ''; ?> class="fahar-filter-options<?php echo $depth ? ' fahar-filter-options--nested' : ''; ?>" data-fahar-category-list>
+		<?php foreach ( $categories as $category ) : ?>
+			<?php
+			$children    = isset( $category['children'] ) && is_array( $category['children'] ) ? $category['children'] : array();
+			$children_id = $instance . '-children-' . absint( $category['id'] );
+			$expanded    = ! empty( $category['expanded'] );
+			?>
+			<li class="fahar-filter-category<?php echo $children ? ' has-children' : ''; ?>">
+				<div class="fahar-filter-category__row">
+					<a class="fahar-filter-option" href="<?php echo esc_url( $category['url'] ); ?>" <?php if ( ! empty( $category['selected'] ) ) : ?>aria-current="page"<?php endif; ?>>
+						<span class="fahar-filter-option__label"><?php echo esc_html( $category['label'] ); ?></span>
+					</a>
+					<?php if ( $children ) : ?>
+						<button class="fahar-filter-category__toggle" type="button" aria-expanded="<?php echo $expanded ? 'true' : 'false'; ?>" aria-controls="<?php echo esc_attr( $children_id ); ?>" aria-label="<?php echo esc_attr( sprintf( $expanded ? __( 'پنهان‌کردن زیرمجموعه‌های %s', 'fahar-theme-child' ) : __( 'نمایش زیرمجموعه‌های %s', 'fahar-theme-child' ), $category['label'] ) ); ?>" data-expand-label="<?php echo esc_attr( sprintf( __( 'نمایش زیرمجموعه‌های %s', 'fahar-theme-child' ), $category['label'] ) ); ?>" data-collapse-label="<?php echo esc_attr( sprintf( __( 'پنهان‌کردن زیرمجموعه‌های %s', 'fahar-theme-child' ), $category['label'] ) ); ?>" data-fahar-category-toggle>
+							<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+						</button>
+					<?php endif; ?>
+				</div>
+				<?php $fahar_render_category_options( $children, $instance, $depth + 1, $children_id ); ?>
+			</li>
+		<?php endforeach; ?>
+	</ul>
+	<?php
+};
 ?>
 <div class="fahar-explore-discovery" data-fahar-filter-root>
 	<button class="fahar-button fahar-button--secondary fahar-filter-trigger" type="button" aria-expanded="false" aria-controls="<?php echo esc_attr( $fahar_filter_panel_id ); ?>" data-fahar-filter-trigger hidden>
-		<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M7 14v6" /></svg>
+		<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
 		<span><?php echo esc_html( $fahar_filter_label ); ?></span>
 	</button>
 
 	<details class="fahar-filter-disclosure" data-fahar-filter-disclosure>
 		<summary class="fahar-filter-fallback-trigger">
-			<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M7 14v6" /></svg>
+			<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
 			<span><?php echo esc_html( $fahar_filter_label ); ?></span>
 		</summary>
 
@@ -53,7 +84,7 @@ if ( ! $fahar_filter_categories ) {
 				</button>
 			</header>
 
-			<div class="fahar-filter-panel__body">
+			<div id="<?php echo esc_attr( $fahar_filter_body_id ); ?>" class="fahar-filter-panel__body" data-fahar-filter-panel-body>
 				<nav class="fahar-filter-group" aria-labelledby="<?php echo esc_attr( $fahar_filter_instance ); ?>-categories">
 					<h3 id="<?php echo esc_attr( $fahar_filter_instance ); ?>-categories" class="fahar-filter-group__legend"><?php esc_html_e( 'دسته‌بندی‌ها', 'fahar-theme-child' ); ?></h3>
 					<ul class="fahar-filter-options">
@@ -62,14 +93,8 @@ if ( ! $fahar_filter_categories ) {
 								<span><?php esc_html_e( 'همه دسته‌بندی‌ها', 'fahar-theme-child' ); ?></span>
 							</a>
 						</li>
-						<?php foreach ( $fahar_filter_categories as $fahar_filter_category ) : ?>
-							<li>
-								<a class="fahar-filter-option" href="<?php echo esc_url( $fahar_filter_category['url'] ); ?>" <?php if ( ! empty( $fahar_filter_category['selected'] ) ) : ?>aria-current="page"<?php endif; ?>>
-									<span><?php echo esc_html( $fahar_filter_category['label'] ); ?></span>
-								</a>
-							</li>
-						<?php endforeach; ?>
 					</ul>
+					<?php $fahar_render_category_options( $fahar_filter_categories, $fahar_filter_instance ); ?>
 				</nav>
 
 				<?php if ( $fahar_filter_has_category && $fahar_filter_tags ) : ?>
@@ -112,7 +137,9 @@ unset(
 	$fahar_filter_instance,
 	$fahar_filter_panel_id,
 	$fahar_filter_title_id,
+	$fahar_filter_body_id,
 	$fahar_filter_label,
+	$fahar_render_category_options,
 	$fahar_filter_category,
 	$fahar_filter_tag
 );
