@@ -2,6 +2,10 @@
 
 All notable changes to Fahar Theme Child are documented here.
 
+## 1.2.4 - 2026-09-06
+
+- Fixed the header search trigger reading as a flat black circle (its near-black badge had no visible edge against the equally dark header). It's an Elementor-authored header widget, not a template in this repo, so only its color surface is overridden here: an elevated dark surface with a subtle Desert Gold-tinted border, gold on hover — one of the few intentional accent moments, matching the search-action convention from the original brand reference.
+
 ## 1.2.3 - 2026-09-06
 
 - Sidebar categories now render as a plain list (no thumbnails), with working expand/collapse for subcategories.
