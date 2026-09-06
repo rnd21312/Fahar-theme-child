@@ -1,0 +1,55 @@
+name: Release theme
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate tag and theme version
+        shell: pwsh
+        run: |
+          $tagVersion = '${{ github.ref_name }}'.TrimStart('v', 'V')
+          if ($tagVersion -notmatch '^\d+\.\d+\.\d+(?:\.\d+)?$') {
+            throw "Invalid stable version tag: ${{ github.ref_name }}"
+          }
+          $style = Get-Content -Raw -LiteralPath style.css
+          $match = [regex]::Match($style, '(?mi)^Version:\s*(?<version>\S+)\s*$')
+          if (-not $match.Success -or $match.Groups['version'].Value -ne $tagVersion) {
+            throw "style.css Version must match tag ${{ github.ref_name }}"
+          }
+
+      - name: Build production archive
+        shell: pwsh
+        run: ./tools/build-theme.ps1 -Clean -ArchiveName fahartheme.zip
+
+      - name: Verify archive structure
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.IO.Compression
+          $archive = [IO.Compression.ZipFile]::OpenRead('build/fahartheme.zip')
+          try {
+            $entries = @($archive.Entries.FullName)
+            if ($entries -cnotcontains 'fahar-theme-child/style.css') {
+              throw 'Archive is missing fahar-theme-child/style.css'
+            }
+            if ($entries | Where-Object { -not $_.StartsWith('fahar-theme-child/') }) {
+              throw 'Archive contains files outside fahar-theme-child/'
+            }
+          } finally {
+            $archive.Dispose()
+          }
+
+      - name: Publish GitHub release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" build/fahartheme.zip --generate-notes --verify-tag || gh release upload "${{ github.ref_name }}" build/fahartheme.zip --clobber
