@@ -174,7 +174,6 @@ $fahar_build_category_links = static function ( $parent_id ) use ( &$fahar_build
 		$category_args['portfolio_category'] = $category_term->slug;
 		$links[]                             = array(
 			'id'       => $category_term->term_id,
-			'image_id' => 0 === $parent_id ? fahar_theme_get_portfolio_category_image_id( $category_term ) : 0,
 			'label'    => $category_term->name,
 			'slug'     => $category_term->slug,
 			'url'      => add_query_arg( $category_args, $fahar_explore_url ),
@@ -319,6 +318,14 @@ get_header();
 				<button class="fahar-button fahar-button--ghost fahar-button--icon fahar-explore__sidebar-toggle" type="button" aria-expanded="true" aria-controls="fahar-explore-sidebar-content" aria-label="<?php esc_attr_e( 'بستن نوار کناری', 'fahar-theme-child' ); ?>" data-expand-label="<?php esc_attr_e( 'بازکردن نوار کناری', 'fahar-theme-child' ); ?>" data-collapse-label="<?php esc_attr_e( 'بستن نوار کناری', 'fahar-theme-child' ); ?>" data-fahar-sidebar-toggle hidden>
 					<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" /><path d="M9 3v18" /></svg>
 				</button>
+				<div class="fahar-explore__sidebar-collapsed-actions" data-fahar-sidebar-collapsed-actions hidden>
+					<button class="fahar-button fahar-button--ghost fahar-button--icon" type="button" aria-label="<?php esc_attr_e( 'جستجو', 'fahar-theme-child' ); ?>" data-fahar-sidebar-expand="search">
+						<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4.5 4.5" /></svg>
+					</button>
+					<button class="fahar-button fahar-button--ghost fahar-button--icon" type="button" aria-label="<?php esc_attr_e( 'دسته‌بندی‌ها', 'fahar-theme-child' ); ?>" data-fahar-sidebar-expand="filters">
+						<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+					</button>
+				</div>
 				<div id="fahar-explore-sidebar-content" class="fahar-explore__sidebar-inner" data-fahar-sidebar-content>
 					<form
 						class="fahar-explore-search"

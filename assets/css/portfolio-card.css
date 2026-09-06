@@ -108,8 +108,8 @@
 
 .fahar-portfolio-card__meta {
 	margin-block-start: var(--fahar-space-1);
-	color: var(--fahar-color-text-muted);
-	font-size: var(--fahar-text-meta);
+	color: var(--fahar-color-text-secondary);
+	font-size: var(--fahar-text-body-sm);
 	line-height: var(--fahar-line-height-heading);
 	overflow-wrap: anywhere;
 }
@@ -139,10 +139,6 @@ a.fahar-portfolio-card__link:active .fahar-portfolio-card__media::after {
 		transform: scale(1.06);
 	}
 
-	a.fahar-portfolio-card__link:hover .fahar-portfolio-card__title,
-	a.fahar-portfolio-card__link:focus-visible .fahar-portfolio-card__title {
-		color: var(--fahar-color-accent);
-	}
 }
 
 @media (prefers-reduced-motion: reduce) {

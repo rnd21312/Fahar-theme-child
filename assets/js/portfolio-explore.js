@@ -794,11 +794,14 @@
 		const sidebar = explore.querySelector('.fahar-explore__sidebar');
 		const toggle = sidebar ? sidebar.querySelector('[data-fahar-sidebar-toggle]') : null;
 		const content = sidebar ? sidebar.querySelector('[data-fahar-sidebar-content]') : null;
+		const collapsedActions = sidebar ? sidebar.querySelector('[data-fahar-sidebar-collapsed-actions]') : null;
 
 		if (!sidebar || !toggle || !content) {
 			return;
 		}
 
+		const searchInput = content.querySelector('[data-fahar-search-input]');
+		const firstFilterOption = content.querySelector('.fahar-filter-option');
 		const desktopQuery = window.matchMedia('(min-width: 64rem)');
 		let expanded = true;
 
@@ -806,15 +809,37 @@
 			expanded = nextExpanded;
 			const isDesktop = desktopQuery.matches;
 			const isExpanded = !isDesktop || expanded;
+			const isCollapsed = isDesktop && !isExpanded;
 
 			toggle.hidden = !isDesktop;
 			toggle.setAttribute('aria-expanded', String(isExpanded));
 			toggle.setAttribute('aria-label', isExpanded ? toggle.dataset.collapseLabel : toggle.dataset.expandLabel);
 			content.hidden = !isExpanded;
-			explore.classList.toggle('is-sidebar-collapsed', isDesktop && !isExpanded);
+			if (collapsedActions) {
+				collapsedActions.hidden = !isCollapsed;
+			}
+			explore.classList.toggle('is-sidebar-collapsed', isCollapsed);
 		};
 
 		toggle.addEventListener('click', () => setExpanded(!expanded));
+
+		if (collapsedActions) {
+			collapsedActions.addEventListener('click', (event) => {
+				const button = event.target instanceof Element ? event.target.closest('[data-fahar-sidebar-expand]') : null;
+
+				if (!button) {
+					return;
+				}
+
+				setExpanded(true);
+
+				const target = 'search' === button.dataset.faharSidebarExpand ? searchInput : firstFilterOption;
+
+				if (target) {
+					window.requestAnimationFrame(() => target.focus({ preventScroll: true }));
+				}
+			});
+		}
 
 		const configureViewport = () => setExpanded(desktopQuery.matches ? expanded : true);
 

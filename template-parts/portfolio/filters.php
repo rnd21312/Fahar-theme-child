@@ -48,24 +48,6 @@ $fahar_render_category_options = static function ( $categories, $instance, $dept
 			<li class="fahar-filter-category<?php echo $children ? ' has-children' : ''; ?>">
 				<div class="fahar-filter-category__row">
 					<a class="fahar-filter-option" href="<?php echo esc_url( $category['url'] ); ?>" <?php if ( ! empty( $category['selected'] ) ) : ?>aria-current="page"<?php endif; ?>>
-						<?php if ( ! $depth ) : ?>
-							<span class="fahar-filter-option__media" aria-hidden="true">
-								<?php
-								if ( ! empty( $category['image_id'] ) ) {
-									echo wp_get_attachment_image(
-										absint( $category['image_id'] ),
-										'medium',
-										false,
-										array(
-											'alt'      => '',
-											'loading'  => 'lazy',
-											'decoding' => 'async',
-										)
-									); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core image markup from a verified attachment ID.
-								}
-								?>
-							</span>
-						<?php endif; ?>
 						<span class="fahar-filter-option__label"><?php echo esc_html( $category['label'] ); ?></span>
 					</a>
 					<?php if ( $children ) : ?>
