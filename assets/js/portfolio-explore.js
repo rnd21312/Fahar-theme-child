@@ -254,7 +254,7 @@
 				if (responseHasMore) {
 					const parsedNextUrl = new URL(responseNextUrl, window.location.href);
 					const exploreUrl = new URL(initialLocation);
-					const stateKeys = ['portfolio_search', 'portfolio_category', 'portfolio_tag'];
+					const stateKeys = ['portfolio_search', 'portfolio_category', 'portfolio_tag', 'portfolio_sort'];
 					const hasMatchingState = stateKeys.every((key) => parsedNextUrl.searchParams.get(key) === exploreUrl.searchParams.get(key));
 
 					if (

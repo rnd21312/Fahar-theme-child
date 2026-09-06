@@ -22,9 +22,26 @@ if ( '' === trim( $fahar_explore_title ) ) {
 $fahar_search_input   = isset( $_GET['portfolio_search'] ) ? wp_unslash( $_GET['portfolio_search'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only public filtering.
 $fahar_category_input = isset( $_GET['portfolio_category'] ) ? wp_unslash( $_GET['portfolio_category'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only public filtering.
 $fahar_tag_input      = isset( $_GET['portfolio_tag'] ) ? wp_unslash( $_GET['portfolio_tag'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only public filtering.
+$fahar_sort_input     = isset( $_GET['portfolio_sort'] ) ? wp_unslash( $_GET['portfolio_sort'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only public sorting.
 $fahar_search_term    = is_scalar( $fahar_search_input ) ? trim( sanitize_text_field( (string) $fahar_search_input ) ) : '';
 $fahar_category_slug  = is_scalar( $fahar_category_input ) ? sanitize_title( (string) $fahar_category_input ) : '';
 $fahar_tag_slug       = is_scalar( $fahar_tag_input ) ? sanitize_title( (string) $fahar_tag_input ) : '';
+$fahar_sort_options   = array(
+	'latest' => array(
+		'label'   => __( 'جدیدترین', 'fahar-theme-child' ),
+		'orderby' => array( 'date' => 'DESC', 'ID' => 'DESC' ),
+	),
+	'oldest' => array(
+		'label'   => __( 'قدیمی‌ترین', 'fahar-theme-child' ),
+		'orderby' => array( 'date' => 'ASC', 'ID' => 'ASC' ),
+	),
+	'az'     => array(
+		'label'   => __( 'الفبا (آ تا ی)', 'fahar-theme-child' ),
+		'orderby' => array( 'title' => 'ASC', 'ID' => 'DESC' ),
+	),
+);
+$fahar_sort_key       = is_scalar( $fahar_sort_input ) ? sanitize_key( (string) $fahar_sort_input ) : '';
+$fahar_sort_key       = isset( $fahar_sort_options[ $fahar_sort_key ] ) ? $fahar_sort_key : 'latest';
 
 $fahar_explore_post_type = fahar_theme_get_portfolio_post_type();
 $fahar_category_taxonomy  = fahar_theme_get_explore_filter_taxonomy( 'category' );
@@ -91,8 +108,42 @@ $fahar_filter_reset_url = '' !== $fahar_search_term ? add_query_arg( 'portfolio_
 $fahar_has_filters      = $fahar_selected_category instanceof WP_Term || $fahar_selected_tag instanceof WP_Term;
 $fahar_active_count     = ( $fahar_selected_category instanceof WP_Term ? 1 : 0 ) + ( $fahar_selected_tag instanceof WP_Term ? 1 : 0 );
 $fahar_state_base_args  = '' !== $fahar_search_term ? array( 'portfolio_search' => $fahar_search_term ) : array();
+
+if ( 'latest' !== $fahar_sort_key ) {
+	$fahar_state_base_args['portfolio_sort'] = $fahar_sort_key;
+}
+
 $fahar_category_links       = array();
 $fahar_all_categories_url = $fahar_state_base_args ? add_query_arg( $fahar_state_base_args, $fahar_explore_url ) : $fahar_explore_url;
+$fahar_sort_links           = array();
+$fahar_sort_base_args       = array();
+
+if ( '' !== $fahar_search_term ) {
+	$fahar_sort_base_args['portfolio_search'] = $fahar_search_term;
+}
+
+if ( $fahar_selected_category instanceof WP_Term ) {
+	$fahar_sort_base_args['portfolio_category'] = $fahar_selected_category->slug;
+}
+
+if ( $fahar_selected_tag instanceof WP_Term ) {
+	$fahar_sort_base_args['portfolio_tag'] = $fahar_selected_tag->slug;
+}
+
+foreach ( $fahar_sort_options as $fahar_sort_option_key => $fahar_sort_option ) {
+	$fahar_sort_option_args = $fahar_sort_base_args;
+
+	if ( 'latest' !== $fahar_sort_option_key ) {
+		$fahar_sort_option_args['portfolio_sort'] = $fahar_sort_option_key;
+	}
+
+	$fahar_sort_links[] = array(
+		'key'      => $fahar_sort_option_key,
+		'label'    => $fahar_sort_option['label'],
+		'url'      => $fahar_sort_option_args ? add_query_arg( $fahar_sort_option_args, $fahar_explore_url ) : $fahar_explore_url,
+		'selected' => $fahar_sort_option_key === $fahar_sort_key,
+	);
+}
 
 $fahar_category_term_index = array();
 $fahar_category_children   = array();
@@ -188,7 +239,7 @@ $fahar_explore_query_args     = array(
 	'post_type'           => $fahar_explore_post_type,
 	'post_status'         => 'publish',
 	'posts_per_page'      => $fahar_posts_per_page,
-	'orderby'             => array( 'date' => 'DESC', 'ID' => 'DESC' ),
+	'orderby'             => $fahar_sort_options[ $fahar_sort_key ]['orderby'],
 	'ignore_sticky_posts' => true,
 	'paged'               => $fahar_explore_page,
 	'no_found_rows'       => false,
@@ -225,6 +276,10 @@ if ( $fahar_explore_query instanceof WP_Query && $fahar_explore_page < (int) $fa
 
 	if ( '' !== $fahar_search_term ) {
 		$fahar_next_url_args['portfolio_search'] = $fahar_search_term;
+	}
+
+	if ( 'latest' !== $fahar_sort_key ) {
+		$fahar_next_url_args['portfolio_sort'] = $fahar_sort_key;
 	}
 
 	$fahar_next_url_args['portfolio_page'] = $fahar_explore_page + 1;
@@ -336,6 +391,14 @@ get_header();
 			<section class="fahar-explore__results" aria-labelledby="fahar-explore-results-title">
 				<h2 id="fahar-explore-results-title" class="screen-reader-text"><?php esc_html_e( 'نتایج نمونه‌کارها', 'fahar-theme-child' ); ?></h2>
 
+				<?php if ( $fahar_sort_links ) : ?>
+					<div class="fahar-explore__sort" role="group" aria-label="<?php esc_attr_e( 'ترتیب نمایش نمونه‌کارها', 'fahar-theme-child' ); ?>">
+						<?php foreach ( $fahar_sort_links as $fahar_sort_link ) : ?>
+							<a class="fahar-explore__sort-option" href="<?php echo esc_url( $fahar_sort_link['url'] ); ?>"<?php if ( $fahar_sort_link['selected'] ) : ?> aria-current="true"<?php endif; ?>><?php echo esc_html( $fahar_sort_link['label'] ); ?></a>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
+
 				<?php if ( $fahar_subcategory_links ) : ?>
 					<nav class="fahar-explore__subcategories" aria-label="<?php esc_attr_e( 'زیرمجموعه‌های دسته‌بندی', 'fahar-theme-child' ); ?>">
 						<ul>
@@ -380,9 +443,18 @@ unset(
 	$fahar_search_input,
 	$fahar_category_input,
 	$fahar_tag_input,
+	$fahar_sort_input,
 	$fahar_search_term,
 	$fahar_category_slug,
 	$fahar_tag_slug,
+	$fahar_sort_options,
+	$fahar_sort_key,
+	$fahar_sort_links,
+	$fahar_sort_base_args,
+	$fahar_sort_option_key,
+	$fahar_sort_option,
+	$fahar_sort_option_args,
+	$fahar_sort_link,
 	$fahar_explore_post_type,
 	$fahar_category_taxonomy,
 	$fahar_tag_taxonomy,
